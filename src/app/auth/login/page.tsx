@@ -44,8 +44,9 @@ export default function Login() {
         return;
       }
 
-    } catch (error) {
-      console.error("Login error:", error); // Log the error for debugging
+      // Redirect to the dashboard
+      router.push("/dashboard");
+    } catch {
       setError("An unexpected error occurred. Please try again later.");
     }
   };
