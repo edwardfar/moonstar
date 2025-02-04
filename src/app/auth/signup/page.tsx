@@ -53,7 +53,8 @@ export default function SignUp() {
 
       // Redirect to the login page
       router.push("/auth/login");
-    } catch (err) {
+    } catch (error) {
+      console.error(error);
       setError("An unexpected error occurred. Please try again later.");
     }
   };
