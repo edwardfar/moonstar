@@ -44,9 +44,8 @@ export default function Login() {
         return;
       }
 
-      // Redirect to dashboard based on user type
-      router.push("/dashboard");
     } catch (error) {
+      console.error("Login error:", error); // Log the error for debugging
       setError("An unexpected error occurred. Please try again later.");
     }
   };
