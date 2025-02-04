@@ -21,7 +21,7 @@ export default function Login() {
       });
 
       if (authError) {
-        setError(authError.message);
+        setError("Invalid email or password. Please try again.");
         return;
       }
 
@@ -32,8 +32,8 @@ export default function Login() {
         .eq("id", authData.user?.id)
         .single();
 
-      if (profileError) {
-        setError(profileError.message);
+      if (profileError || !userProfile) {
+        setError("Unable to retrieve user profile. Please contact support.");
         return;
       }
 
@@ -44,9 +44,9 @@ export default function Login() {
         return;
       }
 
-      // Redirect based on user type
+      // Redirect to dashboard based on user type
       router.push("/dashboard");
-    } catch (err) {
+    } catch (error) {
       setError("An unexpected error occurred. Please try again later.");
     }
   };

@@ -1,6 +1,7 @@
-"use client"; // Add this at the top for client-side rendering
+"use client";
+
 import React, { useState } from "react";
-import { useRouter } from "next/navigation"; // Updated import
+import { useRouter } from "next/navigation";
 import { supabase } from "../../../../lib/supabase";
 
 export default function SignUp() {
@@ -9,51 +10,56 @@ export default function SignUp() {
   const [companyName, setCompanyName] = useState("");
   const [registeringAs, setRegisteringAs] = useState("Individual");
   const [street, setStreet] = useState("");
-  const [unitNumber, setUnitNumber] = useState(""); // Optional field
+  const [unitNumber, setUnitNumber] = useState("");
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
-  const [zipCode, setZipCode] = useState(""); // New state
+  const [zipCode, setZipCode] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+
     try {
+      // Attempt to sign up the user
       const { data, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
       });
 
       if (signUpError) {
-        setError(signUpError.message);
+        setError("Failed to create an account. Please try again.");
         return;
       }
 
-      const { error: insertError } = await supabase.from('users').insert({
+      // Insert user profile data into the "users" table
+      const { error: insertError } = await supabase.from("users").insert({
         id: data.user?.id,
         email,
         company_name: companyName,
         registering_as: registeringAs,
-        is_approved: false,
-        street: street, // Replace with your state variable
-        unit_number: unitNumber,       // Optional
-        city: city,            // Ensure you're using `address_city` here
-        state: state,
-        zip_code: zipCode,             // Ensure you match the column name in Supabase
-    });    
+        is_approved: false, // Default to not approved
+        street,
+        unit_number: unitNumber,
+        city,
+        state,
+        zip_code: zipCode,
+      });
+
       if (insertError) {
-        setError(insertError.message);
+        setError("Failed to save user details. Please try again.");
         return;
       }
 
+      // Redirect to the login page
       router.push("/auth/login");
     } catch (err) {
-      setError("An unexpected error occurred");
+      setError("An unexpected error occurred. Please try again later.");
     }
   };
 
   return (
-    <div className="max-w-md mx-auto p-4 border rounded shadow-lg">
+    <div className="max-w-md mx-auto p-6 border rounded shadow-lg mt-10">
       <h1 className="text-2xl font-bold mb-4">Sign Up</h1>
       <form onSubmit={handleSignUp} className="space-y-4">
         <label className="block">
