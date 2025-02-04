@@ -14,7 +14,6 @@ export default function Login() {
     e.preventDefault();
 
     try {
-      // Attempt to sign in the user
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -25,7 +24,6 @@ export default function Login() {
         return;
       }
 
-      // Fetch the user's profile from your custom "users" table
       const { data: userProfile, error: profileError } = await supabase
         .from("users")
         .select("is_approved, registering_as")
@@ -37,14 +35,12 @@ export default function Login() {
         return;
       }
 
-      // Check approval status
       if (!userProfile.is_approved) {
         setError("Your account is pending approval. Please wait for admin approval.");
         await supabase.auth.signOut();
         return;
       }
 
-      // Redirect to the dashboard
       router.push("/dashboard");
     } catch {
       setError("An unexpected error occurred. Please try again later.");
