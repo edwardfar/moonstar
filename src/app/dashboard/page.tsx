@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../../../lib/supabase";
 import PrivateHeader from "../headers/privateheader";
 import { useAuth } from "../AuthContext";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
 type Order = {
   id: number;
@@ -12,14 +12,24 @@ type Order = {
   created_at: string;
   total: number;
   status: string;
-  items: any; // Replace `any` with a specific type if known
+  items: any;
 };
 
 export default function Dashboard() {
-  const { user, setUser } = useAuth(); // Access user and setUser from AuthContext
+  const { user, setUser } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      setUser(null);
+      router.push("/"); // Redirect to the home page
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
+  };
 
   const fetchOrders = async () => {
     try {
@@ -36,16 +46,6 @@ export default function Dashboard() {
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut();
-      setUser(null);
-      router.push("/"); // Redirect to home page
-    } catch (error) {
-      console.error("Error during logout:", error);
-    }
-  };
-
   useEffect(() => {
     fetchOrders();
   }, []);
@@ -53,7 +53,7 @@ export default function Dashboard() {
   return (
     <div className="bg-gray-100 text-gray-900 font-sans">
       {/* Header */}
-      <PrivateHeader handleLogout={handleLogout} /> {/* Pass handleLogout */}
+      <PrivateHeader handleLogout={handleLogout} />
 
       {/* Dashboard Content */}
       <div className="p-10">
