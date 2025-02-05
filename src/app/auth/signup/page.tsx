@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../../../lib/supabase";
-import PublicHeader from "../../publicheader"; // Ensure the path is correct
+import PublicHeader from "../../headers/publicheader"; // Ensure the path is correct
 
 export default function SignUp() {
   const [email, setEmail] = useState("");

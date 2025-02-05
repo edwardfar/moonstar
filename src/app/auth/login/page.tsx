@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../../../lib/supabase";
-import PublicHeader from "../../publicheader"; // Importing the PublicHeader component
+import PublicHeader from "../../headers/publicheader"; // Importing the PublicHeader component
 
 export default function Login() {
   const [email, setEmail] = useState("");

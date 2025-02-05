@@ -6,8 +6,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { FaTruck } from "react-icons/fa";
 import { useRouter } from "next/navigation";
-import PublicHeader from "../publicheader"; // Ensure path to PublicHeader is correct
-import PrivateHeader from "../privateheader"; // Ensure path to PrivateHeader is correct
+import PublicHeader from "../headers/publicheader"; // Ensure path to PublicHeader is correct
+import PrivateHeader from "../headers/privateheader"; // Ensure path to PrivateHeader is correct
 
 async function fetchProducts() {
   const { data: products, error } = await supabase.from("Products").select("*");

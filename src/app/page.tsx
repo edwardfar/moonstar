@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { supabase } from "../../lib/supabase"; // Adjust the path as per your folder structure
-import PublicHeader from "./publicheader"; // Ensure the path is correct
-import PrivateHeader from "./privateheader"; // Ensure the path is correct
+import PublicHeader from "./headers/publicheader"; // Ensure the path is correct
+import PrivateHeader from "./headers/privateheader"; // Ensure the path is correct
 
 // Define the User type based on Supabase's user structure
 type SupabaseUser = {
