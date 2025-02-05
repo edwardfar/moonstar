@@ -1,12 +1,109 @@
 "use client";
 
-import React from "react";
+import { useEffect, useState } from "react";
+import { supabase } from "../../../lib/supabase";
+import Link from "next/link";
+
+type Order = {
+    id: number;
+    user_id: string;
+    created_at: string;
+    total: number;
+    status: string;
+    items: any; // Replace `any` with a specific type if known
+};
 
 export default function Dashboard() {
-  return (
-    <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-4">Welcome to the Dashboard</h1>
-      <p>This is your dashboard content.</p>
-    </div>
-  );
+    const [orders, setOrders] = useState<Order[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    const fetchOrders = async () => {
+        try {
+            const { data, error } = await supabase.from("Orders").select("*");
+            if (error) {
+                console.error("Error fetching orders:", error);
+            } else {
+                setOrders(data || []);
+            }
+        } catch (err) {
+            console.error("Error fetching orders:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchOrders();
+    }, []);
+
+    return (
+        <div className="bg-gray-100 text-gray-900 font-sans">
+            {/* Header */}
+            <header className="bg-gray-800 p-4 shadow-lg text-white">
+                <nav className="container mx-auto flex justify-between items-center">
+                    <div>
+                        <h1 className="text-2xl font-bold">MoonStar Food LLC</h1>
+                    </div>
+                    <ul className="flex space-x-6 text-lg">
+                        <li>
+                            <Link href="/">Home</Link>
+                        </li>
+                        <li>
+                            <Link href="/products">Products</Link>
+                        </li>
+                        <li>
+                            <Link href="/auth/logout">Logout</Link>
+                        </li>
+                    </ul>
+                </nav>
+            </header>
+
+            {/* Dashboard Content */}
+            <div className="p-10">
+                <h2 className="text-3xl font-bold mb-6">Welcome to Your Dashboard</h2>
+
+                {/* Order History */}
+                <section className="mb-10">
+                    <h3 className="text-2xl font-bold mb-4">Order History</h3>
+                    {loading ? (
+                        <p>Loading orders...</p>
+                    ) : orders.length === 0 ? (
+                        <p>No orders found.</p>
+                    ) : (
+                        <ul>
+                            {orders.map((order) => (
+                                <li key={order.id} className="border-b py-2">
+                                    <strong>Order ID:</strong> {order.id}
+                                    <p>
+                                        <strong>Date:</strong> {new Date(order.created_at).toLocaleDateString()}
+                                    </p>
+                                    <p>
+                                        <strong>Total:</strong> ${order.total}
+                                    </p>
+                                    <p>
+                                        <strong>Status:</strong> {order.status}
+                                    </p>
+                                    <p>
+                                        <strong>Items:</strong>{" "}
+                                        {order.items ? JSON.stringify(order.items) : "No items in order."}
+                                    </p>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </section>
+
+                {/* Promotions */}
+                <section>
+                    <h3 className="text-2xl font-bold mb-4">Promotions</h3>
+                    <p>Get 20% off your next order!</p>
+                </section>
+            </div>
+
+            {/* Footer */}
+            <footer className="bg-gray-800 text-white p-4 text-center">
+                <p>© 2025 MoonStar Food LLC. All rights reserved.</p>
+            </footer>
+        </div>
+    );
 }

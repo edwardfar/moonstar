@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../../../lib/supabase";
+import PublicHeader from "../../publicheader"; // Importing the PublicHeader component
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -48,39 +49,42 @@ export default function Login() {
   };
 
   return (
-    <div className="max-w-md mx-auto p-6 border rounded shadow-lg mt-10">
-      <h1 className="text-2xl font-bold mb-4">Login</h1>
-      <form onSubmit={handleLogin} className="space-y-4">
-        <label className="block">
-          Email <span className="text-red-500">*</span>
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-2 border rounded"
-            required
-          />
-        </label>
-        <label className="block">
-          Password <span className="text-red-500">*</span>
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-2 border rounded"
-            required
-          />
-        </label>
-        <button
-          type="submit"
-          className="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-        >
-          Login
-        </button>
-      </form>
-      {error && <p className="text-red-500 mt-4">{error}</p>}
+    <div>
+      <PublicHeader /> {/* Adding the PublicHeader component */}
+      <div className="max-w-md mx-auto p-6 border rounded shadow-lg mt-10">
+        <h1 className="text-2xl font-bold mb-4">Login</h1>
+        <form onSubmit={handleLogin} className="space-y-4">
+          <label className="block">
+            Email <span className="text-red-500">*</span>
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full p-2 border rounded"
+              required
+            />
+          </label>
+          <label className="block">
+            Password <span className="text-red-500">*</span>
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full p-2 border rounded"
+              required
+            />
+          </label>
+          <button
+            type="submit"
+            className="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Login
+          </button>
+        </form>
+        {error && <p className="text-red-500 mt-4">{error}</p>}
+      </div>
     </div>
   );
 }
