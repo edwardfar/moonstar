@@ -8,8 +8,7 @@ import PrivateHeader from "./headers/privateheader"; // Ensure the path is corre
 // Define the User type based on Supabase's user structure
 type SupabaseUser = {
   id: string;
-  email?: string; // Mark email as optional to handle undefined values
-  [key: string]: any; // Allow other fields from Supabase user object
+  email: string | null | undefined; // Updated to handle undefined values
 };
 
 export default function HomePage() {
@@ -17,11 +16,14 @@ export default function HomePage() {
 
   useEffect(() => {
     const checkUser = async () => {
-      try {
-        const { data } = await supabase.auth.getSession();
-        setUser(data.session?.user || null);
-      } catch (error) {
-        console.error("Error fetching user session:", error);
+      const { data: sessionData } = await supabase.auth.getSession();
+
+      if (sessionData?.session?.user) {
+        setUser({
+          id: sessionData.session.user.id,
+          email: sessionData.session.user.email ?? null, // Handle undefined email
+        });
+      } else {
         setUser(null);
       }
     };
