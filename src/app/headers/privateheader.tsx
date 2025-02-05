@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { FaTruck } from "react-icons/fa";
 
-export default function PrivateHeader() {
+export default function privateheader() {
   return (
     <header className="bg-gray-800 p-4 text-white">
       <div className="container mx-auto flex justify-between items-center">
