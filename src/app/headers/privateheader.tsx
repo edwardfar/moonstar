@@ -3,7 +3,11 @@
 import Link from "next/link";
 import { FaTruck } from "react-icons/fa";
 
-export default function privateheader() {
+type PrivateHeaderProps = {
+  handleLogout: () => Promise<void>;
+};
+
+export default function PrivateHeader({ handleLogout }: PrivateHeaderProps) {
   return (
     <header className="bg-gray-800 p-4 text-white">
       <div className="container mx-auto flex justify-between items-center">
@@ -27,7 +31,12 @@ export default function privateheader() {
               </Link>
             </li>
             <li>
-              <Link href="/auth/logout">Logout</Link>
+              <button
+                onClick={handleLogout}
+                className="bg-red-500 hover:bg-red-400 text-white px-4 py-2 rounded"
+              >
+                Logout
+              </button>
             </li>
           </ul>
         </nav>
