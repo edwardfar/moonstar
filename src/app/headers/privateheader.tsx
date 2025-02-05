@@ -4,7 +4,7 @@ import Link from "next/link";
 import { FaTruck } from "react-icons/fa";
 
 type PrivateHeaderProps = {
-  handleLogout: () => Promise<void>;
+  handleLogout: () => void; // Define the type for the prop
 };
 
 export default function PrivateHeader({ handleLogout }: PrivateHeaderProps) {
@@ -26,15 +26,7 @@ export default function PrivateHeader({ handleLogout }: PrivateHeaderProps) {
               <Link href="/dashboard">My Account</Link>
             </li>
             <li>
-              <Link href="/cart">
-                <FaTruck size={24} className="inline-block" />
-              </Link>
-            </li>
-            <li>
-              <button
-                onClick={handleLogout}
-                className="bg-red-500 hover:bg-red-400 text-white px-4 py-2 rounded"
-              >
+              <button onClick={handleLogout} className="text-red-500">
                 Logout
               </button>
             </li>
