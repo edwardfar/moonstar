@@ -19,6 +19,7 @@ export default function Dashboard() {
   const { user, setUser } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [cart, setCart] = useState<any[]>([]); // Simulating cart data
   const router = useRouter();
 
   const handleLogout = async () => {
@@ -53,7 +54,7 @@ export default function Dashboard() {
   return (
     <div className="bg-gray-100 text-gray-900 font-sans">
       {/* Header */}
-      <PrivateHeader handleLogout={handleLogout} cartCount={0} />
+      <PrivateHeader handleLogout={handleLogout} cartCount={cart.length} />
 
       {/* Dashboard Content */}
       <div className="p-10">

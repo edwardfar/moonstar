@@ -37,13 +37,18 @@ export default function ProductPage() {
     if (user.role === "wholesale") return `$${product.wholesale_price.toFixed(2)}`;
     if (user.role === "distributor") return `$${product.distributor_price.toFixed(2)}`;
     return "Contact Us"; // Fallback for undefined roles
-};
+  };
+
+  const handleLogout = async () => {
+    console.log("Logged out");
+    return Promise.resolve(); // Dummy logout implementation
+  };
 
   return (
     <div className="bg-gray-100 text-gray-900 font-sans">
       {/* Header */}
       {user ? (
-        <PrivateHeader handleLogout={() => {}} cartCount={cart.length} />
+        <PrivateHeader handleLogout={handleLogout} cartCount={cart.length} />
       ) : (
         <PublicHeader />
       )}
