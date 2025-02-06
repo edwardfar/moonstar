@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../../lib/supabase";
 import PrivateHeader from "../headers/privateheader";
-import { useAuth } from "../AuthContext";
+import { useAuth } from "../auth/AuthContext";
 import { useRouter } from "next/navigation";
 
 type Order = {

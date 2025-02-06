@@ -9,7 +9,7 @@ export default function SignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [companyName, setCompanyName] = useState("");
-  const [registeringAs, setRegisteringAs] = useState("Individual");
+  const [registeringAs, setRegisteringAs] = useState("retail");
   const [street, setStreet] = useState("");
   const [unitNumber, setUnitNumber] = useState("");
   const [city, setCity] = useState("");
@@ -103,9 +103,9 @@ export default function SignUp() {
               className="w-full p-2 border rounded"
               required
             >
-              <option value="Individual">Individual</option>
-              <option value="Retailer">Retailer</option>
-              <option value="Distributor">Distributor</option>
+              <option value="retail">Retail</option>
+              <option value="wholesale">Wholesale</option>
+              <option value="distributor">Distributor</option>
             </select>
           </label>
           <label className="block">
@@ -171,6 +171,12 @@ export default function SignUp() {
         </form>
         {error && <p className="text-red-500 mt-4">{error}</p>}
       </div>
+      {/* Footer Section */}
+      <footer className="bg-gray-800 text-white mt-10">
+        <div className="container mx-auto p-6">
+          <p className="text-center">© 2025 MoonStar Food LLC. All rights reserved.</p>
+        </div>
+      </footer>
     </div>
   );
 }

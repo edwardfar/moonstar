@@ -7,11 +7,12 @@ import {
   useEffect,
   ReactNode,
 } from "react";
-import { supabase } from "../../lib/supabase";
+import { supabase } from "../../../lib/supabase";
 
 type User = {
   id: string;
   email: string | null; // Allowing null values for email
+  role?: string; // Include role for additional checks if needed
 };
 
 type AuthContextType = {
@@ -27,30 +28,38 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   const checkUser = async () => {
-    const { data } = await supabase.auth.getSession();
-    if (data.session?.user) {
-      setUser({
-        id: data.session.user.id,
-        email: data.session.user.email ?? null, // Handling undefined email
-      });
-    } else {
+    try {
+      const { data } = await supabase.auth.getSession();
+      if (data.session?.user) {
+        const { data: userData, error } = await supabase
+          .from("users")
+          .select("email, registering_as")
+          .eq("id", data.session.user.id)
+          .single();
+  
+        if (error) {
+          console.error("Error fetching user data:", error);
+          setUser(null);
+        } else if (userData) {
+          setUser({
+            id: data.session.user.id,
+            email: userData.email || null,
+            role: userData.registering_as, // Map role correctly
+          });
+        }
+      } else {
+        setUser(null);
+      }
+    } catch (error) {
+      console.error("Error during user check:", error);
       setUser(null);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-  };
+  };  
 
   useEffect(() => {
     checkUser();
-
-    // Listen to auth state changes
-    const subscription = supabase.auth.onAuthStateChange(() => {
-      checkUser();
-    });
-
-    // Cleanup subscription on component unmount
-    return () => {
-      subscription.data?.subscription?.unsubscribe?.();
-    };
   }, []);
 
   return (

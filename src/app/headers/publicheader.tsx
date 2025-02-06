@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useAuth } from "../AuthContext"; // Adjust the path based on your project structure
+import { useAuth } from "../auth/AuthContext"; // Adjust the path based on your project structure
 
 export default function PublicHeader() {
   const { user, loading } = useAuth();
