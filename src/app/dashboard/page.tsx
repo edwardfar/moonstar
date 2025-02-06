@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../../lib/supabase";
 import PrivateHeader from "../headers/privateheader";
+import PublicHeader from "../headers/publicheader";
 import { useAuth } from "../auth/AuthContext";
 import { useRouter } from "next/navigation";
 
@@ -19,7 +20,7 @@ export default function Dashboard() {
   const { user, setUser } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [cart, setCart] = useState<any[]>([]); // Simulating cart data
+  const [cart, setCart] = useState<any[]>([]); // Track cart items
   const router = useRouter();
 
   const handleLogout = async () => {
@@ -49,12 +50,18 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchOrders();
+    const storedCart = JSON.parse(localStorage.getItem("cart") || "[]");
+    setCart(storedCart);
   }, []);
 
   return (
     <div className="bg-gray-100 text-gray-900 font-sans">
       {/* Header */}
-      <PrivateHeader handleLogout={handleLogout} cartCount={cart.length} />
+      {user ? (
+        <PrivateHeader handleLogout={handleLogout} cartCount={cart.length} />
+      ) : (
+        <PublicHeader />
+      )}
 
       {/* Dashboard Content */}
       <div className="p-10">
