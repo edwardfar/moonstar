@@ -1,14 +1,12 @@
-"use client";
-
-import Link from "next/link";
 import { FaTruck } from "react-icons/fa";
+import Link from "next/link";
 
 type PrivateHeaderProps = {
   handleLogout: () => void;
   cartCount: number;
 };
 
-export default function PrivateHeader({ handleLogout, cartCount }: PrivateHeaderProps) {
+const PrivateHeader: React.FC<PrivateHeaderProps> = ({ handleLogout, cartCount }) => {
   return (
     <header className="bg-gray-800 p-4 text-white">
       <div className="container mx-auto flex justify-between items-center">
@@ -48,4 +46,6 @@ export default function PrivateHeader({ handleLogout, cartCount }: PrivateHeader
       </div>
     </header>
   );
-}
+};
+
+export default PrivateHeader;
