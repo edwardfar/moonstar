@@ -35,7 +35,10 @@ export default function Dashboard() {
 
   const fetchOrders = async () => {
     try {
-      const { data, error } = await supabase.from("Orders").select("*");
+      const { data, error } = await supabase
+        .from("Orders")
+        .select("*")
+        .eq("user_id", user?.id); // Fetch orders specific to the logged-in user
       if (error) {
         console.error("Error fetching orders:", error);
       } else {
@@ -49,10 +52,12 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    fetchOrders();
+    if (user) {
+      fetchOrders();
+    }
     const storedCart = JSON.parse(localStorage.getItem("cart") || "[]");
     setCart(storedCart);
-  }, []);
+  }, [user]);
 
   return (
     <div className="bg-gray-100 text-gray-900 font-sans">
