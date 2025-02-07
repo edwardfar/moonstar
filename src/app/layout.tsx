@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { CartProvider } from "./CartContext";
 import "./globals.css";
 import { AuthProvider } from "./auth/AuthContext"; // Import the AuthProvider component
 
@@ -21,18 +22,14 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProvider>
-          {children}
+          <CartProvider>{children}</CartProvider>
         </AuthProvider>
       </body>
     </html>

@@ -1,119 +1,206 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import Link from "next/link";
+import { useState, useEffect } from "react";
+import { supabase } from "../../../lib/supabase";
+import PrivateHeader from "../headers/privateheader";
+import PublicHeader from "../headers/publicheader";
+import { useAuth } from "../auth/AuthContext";
 import Image from "next/image";
-import { FaTrashAlt } from "react-icons/fa";
+import getStripe from "../../../lib/stripe"; // Ensure the path is correct
 
-export default function Cart() {
-  const [cart, setCart] = useState([]);
+export default function CartPage() {
+  const { user } = useAuth();
+  const [cart, setCart] = useState<any[]>([]);
+  const [suggestedProducts, setSuggestedProducts] = useState<any[]>([]);
 
+  // Fetch cart items from localStorage
   useEffect(() => {
-    const storedCart = JSON.parse(localStorage.getItem("cart") || "[]");
-    setCart(storedCart);
+    const cartItems = JSON.parse(localStorage.getItem("cart") || "[]");
+    setCart(cartItems);
   }, []);
 
-  const removeFromCart = (id: number) => {
-    const updatedCart = cart.filter((item: any) => item.id !== id);
-    setCart(updatedCart);
+  // Fetch suggested products from Supabase
+  useEffect(() => {
+    const fetchSuggestedProducts = async () => {
+      const { data, error } = await supabase.from("Products").select("*").limit(5);
+      if (error) {
+        console.error("Error fetching suggested products:", error);
+      } else {
+        setSuggestedProducts(data || []);
+      }
+    };
+    fetchSuggestedProducts();
+  }, []);
+
+  // Update cart in localStorage
+  const updateCart = (updatedCart: any[]) => {
     localStorage.setItem("cart", JSON.stringify(updatedCart));
+    setCart(updatedCart);
   };
 
-  const getTotal = () => {
-    return cart.reduce((total: number, item: any) => total + item.price * item.quantity, 0).toFixed(2);
+  // Increase product quantity
+  const increaseQuantity = (index: number) => {
+    const updatedCart = [...cart];
+    updatedCart[index].quantity += 1;
+    updateCart(updatedCart);
+  };
+
+  // Decrease product quantity
+  const decreaseQuantity = (index: number) => {
+    const updatedCart = [...cart];
+    if (updatedCart[index].quantity > 1) {
+      updatedCart[index].quantity -= 1;
+      updateCart(updatedCart);
+    }
+  };
+
+  // Remove product from cart
+  const removeProduct = (index: number) => {
+    const updatedCart = cart.filter((_, i) => i !== index);
+    updateCart(updatedCart);
+  };
+
+  // Get total price
+  const getTotalPrice = () => {
+    return cart.reduce((total, item) => total + item.price * item.quantity, 0).toFixed(2);
+  };
+
+  // Checkout logic
+  const handleCheckout = async () => {
+    if (!user) {
+      alert("You need to log in to proceed to checkout.");
+      return;
+    }
+
+    try {
+      const stripe = await getStripe();
+      if (!stripe) {
+        throw new Error("Stripe is not initialized.");
+      }
+
+      const { data, error } = await supabase.from("orders").insert([
+        {
+          user_id: user.id,
+          total: parseFloat(getTotalPrice()),
+          status: "pending",
+          items: cart,
+          payment_type: "card",
+        },
+      ]);
+
+      if (error) {
+        console.error("Error creating order:", error);
+        return;
+      }
+
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ["card"],
+        line_items: cart.map((item) => ({
+          price_data: {
+            currency: "usd",
+            product_data: {
+              name: item.name,
+              images: [`https://www.moonstarfood.us/${item.image}`],
+              metadata: { barcode: item.barcode }, // Include barcode in metadata
+            },
+            unit_amount: item.price * 100,
+          },
+          quantity: item.quantity,
+        })),
+        mode: "payment",
+        success_url: "https://www.moonstarfood.us/success",
+        cancel_url: "https://www.moonstarfood.us/cancel",
+      });
+
+      await stripe.redirectToCheckout({ sessionId: session.id });
+    } catch (error) {
+      console.error("Error during checkout:", error);
+    }
   };
 
   return (
-    <div className="bg-gray-100 text-gray-900 font-sans min-h-screen">
-      {/* Header */}
-      <header className="bg-gray-800 p-4 shadow-lg text-white">
-        <nav className="container mx-auto flex justify-between items-center">
-          <div className="flex items-center space-x-3">
-            <Image src="/products/MoonStar logo.jpg" alt="MoonStar Food LLC" width={50} height={50} />
-            <h1 className="text-3xl font-bold">MoonStar Food LLC</h1>
-          </div>
-          <ul className="flex space-x-6 text-lg">
-            <li>
-              <Link href="/">Home</Link>
-            </li>
-            <li>
-              <Link href="/auth/signup">Sign Up</Link>
-            </li>
-            <li>
-              <Link href="/auth/login">Login</Link>
-            </li>
-            <li>
-              <Link href="/products">Products</Link>
-            </li>
-            <li>
-              <Link href="/dashboard">Dashboard</Link>
-            </li>
-          </ul>
-        </nav>
-      </header>
+    <div className="bg-gray-100 text-gray-900 min-h-screen flex flex-col">
+      {user ? (
+        <PrivateHeader handleLogout={() => {}} cartCount={cart.length} />
+      ) : (
+        <PublicHeader />
+      )}
 
-      {/* Cart Content */}
-      <div className="container mx-auto py-10">
+      <main className="flex-grow p-10">
         <h1 className="text-3xl font-bold mb-6">Shopping Cart</h1>
-
-        {cart.length === 0 ? (
-          <p className="text-lg">Your cart is empty.</p>
-        ) : (
+        {cart.length > 0 ? (
           <>
-            <ul className="space-y-4">
-              {cart.map((item: any) => (
-                <li
-                  key={item.id}
-                  className="flex items-center justify-between border p-4 rounded shadow-md bg-white"
-                >
-                  <div className="flex items-center space-x-4">
-                    <Image
-                      src={`/${item.image}`}
-                      alt={item.name}
-                      width={80}
-                      height={80}
-                      className="object-cover rounded-md"
-                    />
-                    <div>
-                      <h2 className="text-lg font-bold">{item.name}</h2>
-                      <p>Price: ${item.price}</p>
-                      <p>Quantity: {item.quantity}</p>
-                    </div>
-                  </div>
-                  <button
-                    className="text-red-500 hover:text-red-700"
-                    onClick={() => removeFromCart(item.id)}
-                  >
-                    <FaTrashAlt size={24} />
-                  </button>
-                </li>
-              ))}
-            </ul>
-
-            <div className="mt-6 text-right">
-              <h3 className="text-xl font-bold">Total: ${getTotal()}</h3>
+            <table className="w-full bg-white rounded-lg shadow-md">
+              <thead>
+                <tr className="bg-gray-200 text-left">
+                  <th className="p-4">Product</th>
+                  <th className="p-4">Quantity</th>
+                  <th className="p-4">Price</th>
+                  <th className="p-4">Subtotal</th>
+                  <th className="p-4">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {cart.map((item, index) => (
+                  <tr key={index} className="border-b">
+                    <td className="p-4 flex items-center gap-4">
+                      <Image
+                        src={`/${item.image}`}
+                        alt={item.name}
+                        width={50}
+                        height={50}
+                        className="object-cover rounded"
+                      />
+                      <div>
+                        <p>{item.name}</p>
+                        <p className="text-sm text-gray-600">Barcode: {item.barcode}</p>
+                      </div>
+                    </td>
+                    <td className="p-4">
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => decreaseQuantity(index)}
+                          className="bg-gray-200 px-2 py-1 rounded"
+                        >
+                          -
+                        </button>
+                        <span>{item.quantity}</span>
+                        <button
+                          onClick={() => increaseQuantity(index)}
+                          className="bg-gray-200 px-2 py-1 rounded"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </td>
+                    <td className="p-4">${item.price.toFixed(2)}</td>
+                    <td className="p-4">${(item.price * item.quantity).toFixed(2)}</td>
+                    <td className="p-4">
+                      <button
+                        onClick={() => removeProduct(index)}
+                        className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                      >
+                        Remove
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <div className="mt-6 flex justify-between items-center">
+              <h2 className="text-xl font-bold">Total: ${getTotalPrice()}</h2>
               <button
-                className="mt-4 bg-blue-500 text-white px-6 py-2 rounded shadow hover:bg-blue-600"
-                onClick={() => alert("Proceed to checkout")}
+                className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600"
+                onClick={handleCheckout}
               >
-                Proceed to Checkout
+                Checkout
               </button>
             </div>
           </>
+        ) : (
+          <p>Your cart is empty.</p>
         )}
-      </div>
-
-      {/* Footer */}
-      <footer className="bg-gray-800 text-white py-4">
-        <div className="container mx-auto text-center">
-          <p>© 2025 MoonStar Food LLC. All rights reserved.</p>
-          <div className="flex justify-center space-x-6 mt-2">
-            <Link href="/social">Social Media</Link>
-            <Link href="/events">Events</Link>
-            <Link href="/download">Download Our App</Link>
-          </div>
-        </div>
-      </footer>
+      </main>
     </div>
   );
 }
