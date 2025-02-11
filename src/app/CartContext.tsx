@@ -8,12 +8,14 @@ type CartItem = {
   price: number;
   quantity: number;
   image: string;
+  stripe_price_id: string; // ✅ Added Stripe price ID for checkout
 };
 
 type CartContextType = {
   cart: CartItem[];
   addToCart: (item: CartItem) => void;
   updateQuantity: (id: number, quantity: number) => void;
+  removeProduct: (id: number) => void;
   clearCart: () => void;
 };
 
@@ -22,7 +24,6 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
 
-  // Sync cart with localStorage
   useEffect(() => {
     const savedCart = JSON.parse(localStorage.getItem("cart") || "[]");
     setCart(savedCart);
@@ -50,13 +51,17 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     );
   };
 
+  const removeProduct = (id: number) => {
+    setCart((prevCart) => prevCart.filter((item) => item.id !== id));
+  };
+
   const clearCart = () => {
     setCart([]);
     localStorage.removeItem("cart");
   };
 
   return (
-    <CartContext.Provider value={{ cart, addToCart, updateQuantity, clearCart }}>
+    <CartContext.Provider value={{ cart, addToCart, updateQuantity, removeProduct, clearCart }}>
       {children}
     </CartContext.Provider>
   );

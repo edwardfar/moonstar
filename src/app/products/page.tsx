@@ -4,9 +4,8 @@ import React, { useState, useEffect } from "react";
 import { supabase } from "../../../lib/supabase";
 import Image from "next/image";
 import { useAuth } from "../auth/AuthContext";
-import PrivateHeader from "../headers/privateheader";
-import PublicHeader from "../headers/publicheader";
 import { useCart } from "../CartContext";
+import Header from "../components/header"; // ✅ Use unified Header
 
 type Product = {
   id: number;
@@ -18,7 +17,8 @@ type Product = {
   distributor_price: number;
   category: string;
   tags: string[];
-  barcode: string; // Added barcode for additional detail
+  barcode: string;
+  stripe_price_id: string; // ✅ Added Stripe Price ID
 };
 
 export default function ProductPage() {
@@ -78,15 +78,8 @@ export default function ProductPage() {
 
   return (
     <div className="bg-gray-100 text-gray-900 font-sans min-h-screen flex flex-col">
-      {/* Header */}
-      {user ? (
-        <PrivateHeader
-          handleLogout={() => {}}
-          cartCount={cart.reduce((acc, item) => acc + item.quantity, 0)}
-        />
-      ) : (
-        <PublicHeader />
-      )}
+      {/* ✅ Use Unified Header */}
+      <Header />
 
       {/* Filters */}
       <div className="p-4">
@@ -162,6 +155,7 @@ export default function ProductPage() {
                       price: parseFloat(getPrice(product).slice(1)),
                       image: product.image,
                       quantity: quantity || 1,
+                      stripe_price_id: product.stripe_price_id, // ✅ Fixed missing property
                     })
                   }
                 >

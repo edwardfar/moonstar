@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "../../../lib/supabase";
-import PrivateHeader from "../headers/privateheader";
-import PublicHeader from "../headers/publicheader";
+import Header from "../components/header"; // Use unified Header
 import { useAuth } from "../auth/AuthContext";
+import { useCart } from "../CartContext";
 import { useRouter } from "next/navigation";
 
 type Order = {
@@ -17,56 +17,38 @@ type Order = {
 };
 
 export default function Dashboard() {
-  const { user, setUser } = useAuth();
+  const { user, logout } = useAuth();
+  const { cart } = useCart();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [cart, setCart] = useState<any[]>([]); // Track cart items
   const router = useRouter();
 
-  const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut();
-      setUser(null);
-      router.push("/"); // Redirect to the home page
-    } catch (error) {
-      console.error("Error during logout:", error);
-    }
-  };
-
-  const fetchOrders = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("Orders")
-        .select("*")
-        .eq("user_id", user?.id); // Fetch orders specific to the logged-in user
-      if (error) {
-        console.error("Error fetching orders:", error);
-      } else {
-        setOrders(data || []);
-      }
-    } catch (err) {
-      console.error("Error fetching orders:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Fetch user orders
   useEffect(() => {
-    if (user) {
-      fetchOrders();
-    }
-    const storedCart = JSON.parse(localStorage.getItem("cart") || "[]");
-    setCart(storedCart);
+    const fetchOrders = async () => {
+      if (!user?.id) return;
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from("Orders")
+          .select("*")
+          .eq("user_id", user.id);
+        if (error) console.error("Error fetching orders:", error);
+        else setOrders(data || []);
+      } catch (err) {
+        console.error("Error fetching orders:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrders();
   }, [user]);
 
   return (
     <div className="bg-gray-100 text-gray-900 font-sans">
       {/* Header */}
-      {user ? (
-        <PrivateHeader handleLogout={handleLogout} cartCount={cart.length} />
-      ) : (
-        <PublicHeader />
-      )}
+      <Header />
 
       {/* Dashboard Content */}
       <div className="p-10">
@@ -85,8 +67,7 @@ export default function Dashboard() {
                 <li key={order.id} className="border-b py-2">
                   <strong>Order ID:</strong> {order.id}
                   <p>
-                    <strong>Date:</strong>{" "}
-                    {new Date(order.created_at).toLocaleDateString()}
+                    <strong>Date:</strong> {new Date(order.created_at).toLocaleDateString()}
                   </p>
                   <p>
                     <strong>Total:</strong> ${order.total}
@@ -95,8 +76,7 @@ export default function Dashboard() {
                     <strong>Status:</strong> {order.status}
                   </p>
                   <p>
-                    <strong>Items:</strong>{" "}
-                    {order.items ? JSON.stringify(order.items) : "No items in order."}
+                    <strong>Items:</strong> {order.items ? JSON.stringify(order.items) : "No items in order."}
                   </p>
                 </li>
               ))}

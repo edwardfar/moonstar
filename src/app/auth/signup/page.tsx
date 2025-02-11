@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../../../lib/supabase";
-import PublicHeader from "../../headers/publicheader"; // Ensure the path is correct
+import Header from "../../components/header"; // ✅ Use unified header
 
 export default function SignUp() {
   const [email, setEmail] = useState("");
@@ -58,9 +58,11 @@ export default function SignUp() {
   };
 
   return (
-    <div>
-      <PublicHeader />
-      <div className="max-w-md mx-auto p-6 border rounded shadow-lg mt-10">
+    <div className="min-h-screen flex flex-col bg-gray-50">
+      {/* ✅ Unified Header */}
+      <Header />
+
+      <div className="max-w-md mx-auto p-6 border rounded shadow-lg mt-10 bg-white">
         <h1 className="text-2xl font-bold mb-4">Sign Up</h1>
         <form onSubmit={handleSignUp} className="space-y-4">
           <label className="block">
@@ -171,7 +173,8 @@ export default function SignUp() {
         </form>
         {error && <p className="text-red-500 mt-4">{error}</p>}
       </div>
-      {/* Footer Section */}
+
+      {/* ✅ Footer Section */}
       <footer className="bg-gray-800 text-white mt-10">
         <div className="container mx-auto p-6">
           <p className="text-center">© 2025 MoonStar Food LLC. All rights reserved.</p>
