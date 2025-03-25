@@ -12,68 +12,193 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
 
-  // Update cart count globally
+  // Update cart count whenever the cart changes
   useEffect(() => {
-    setCartCount(cart.reduce((acc, item) => acc + item.quantity, 0));
+    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+    setCartCount(totalItems);
   }, [cart]);
+
+  // Optional: If you store a full name in user metadata, you could do:
+  // const [username, setUsername] = useState<string>("");
+  // useEffect(() => {
+  //   if (user) {
+  //     setUsername(user.email); // or user.user_metadata.name
+  //   }
+  // }, [user]);
 
   return (
     <header className="bg-gray-800 text-white p-4 shadow-md fixed w-full top-0 z-50">
       <div className="container mx-auto flex justify-between items-center">
         {/* Logo */}
         <div className="flex items-center space-x-2">
-          <img src="/products/MoonStar_logo.jpg" alt="MoonStar Logo" className="h-8" />
-          <Link href="/" className="text-xl font-bold">MoonStar Food LLC</Link>
+          <img
+            src="products\moonstar-logo.jpg"
+            alt="MoonStar Logo"
+            className="h-8"
+          />
+          <Link href="/" className="text-xl font-bold">
+            MoonStar Food LLC
+          </Link>
         </div>
 
-        {/* Navigation */}
+        {/* Desktop Navigation */}
         <nav className="hidden lg:flex space-x-6 items-center">
-          <Link href="/" className="hover:underline">Home</Link>
           {user ? (
+            /* ---------- PRIVATE NAV (Logged-In) ---------- */
             <>
-              <Link href="/dashboard" className="hover:underline">Dashboard</Link>
-              <Link href="/products" className="hover:underline">Products</Link>
-              <Link href="/cart" className="relative">
-                <FaTruck size={22} />
+              {/* Display a small greeting */}
+              <span className="text-sm text-gray-200">
+                Welcome, {user.email}
+              </span>
+
+              <Link href="/dashboard" className="hover:underline">
+                Dashboard
+              </Link>
+              <Link href="/products" className="hover:underline">
+                Products
+              </Link>
+              <Link href="/cart" className="relative hover:underline">
+                <FaTruck size={20} />
                 {cartCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 rounded-full">
+                  <span className="absolute -top-2 -right-3 bg-red-500 text-white text-xs px-2 rounded-full">
                     {cartCount}
                   </span>
                 )}
               </Link>
-              <button onClick={logout} className="hover:underline text-red-400">Logout</button>
+              <Link href="/about" className="hover:underline">
+                About
+              </Link>
+              <Link href="/contact" className="hover:underline">
+                Contact
+              </Link>
+              <button
+                onClick={logout}
+                className="hover:underline text-red-400 ml-2"
+              >
+                Logout
+              </button>
             </>
           ) : (
+            /* ---------- PUBLIC NAV (Not Logged-In) ---------- */
             <>
-              <Link href="/auth/login" className="hover:underline">Login</Link>
-              <Link href="/auth/signup" className="hover:underline">Sign Up</Link>
+              <Link href="/" className="hover:underline">
+                Home
+              </Link>
+              <Link href="/about" className="hover:underline">
+                About
+              </Link>
+              <Link href="/contact" className="hover:underline">
+                Contact
+              </Link>
+              <Link href="/auth/login" className="hover:underline">
+                Sign In
+              </Link>
+              <Link href="/auth/signup" className="hover:underline">
+                Sign Up
+              </Link>
             </>
           )}
         </nav>
 
-        {/* Mobile Menu Button */}
+        {/* Mobile Menu Button (Hamburger) */}
         <button className="lg:hidden" onClick={() => setMenuOpen(!menuOpen)}>
           {menuOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
         </button>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu (visible if menuOpen = true) */}
       {menuOpen && (
         <div className="lg:hidden bg-gray-900 text-white absolute w-full top-14 left-0 py-4 px-6 space-y-4 shadow-lg">
-          <Link href="/" className="block" onClick={() => setMenuOpen(false)}>Home</Link>
           {user ? (
+            /* ---------- PRIVATE NAV (Mobile) ---------- */
             <>
-              <Link href="/dashboard" className="block" onClick={() => setMenuOpen(false)}>Dashboard</Link>
-              <Link href="/products" className="block" onClick={() => setMenuOpen(false)}>Products</Link>
-              <Link href="/cart" className="block relative" onClick={() => setMenuOpen(false)}>
-                <FaTruck size={22} className="inline-block mr-2" />Cart ({cartCount})
+              <span className="block text-sm text-gray-200">
+                Welcome, {user.email}
+              </span>
+              <Link
+                href="/dashboard"
+                className="block"
+                onClick={() => setMenuOpen(false)}
+              >
+                Dashboard
               </Link>
-              <button onClick={logout} className="block text-red-400">Logout</button>
+              <Link
+                href="/products"
+                className="block"
+                onClick={() => setMenuOpen(false)}
+              >
+                Products
+              </Link>
+              <Link
+                href="/cart"
+                className="block relative"
+                onClick={() => setMenuOpen(false)}
+              >
+                <FaTruck size={20} className="inline-block mr-2" />
+                Cart ({cartCount})
+              </Link>
+              <Link
+                href="/about"
+                className="block"
+                onClick={() => setMenuOpen(false)}
+              >
+                About
+              </Link>
+              <Link
+                href="/contact"
+                className="block"
+                onClick={() => setMenuOpen(false)}
+              >
+                Contact
+              </Link>
+              <button
+                onClick={() => {
+                  logout();
+                  setMenuOpen(false);
+                }}
+                className="block text-red-400"
+              >
+                Logout
+              </button>
             </>
           ) : (
+            /* ---------- PUBLIC NAV (Mobile) ---------- */
             <>
-              <Link href="/auth/login" className="block" onClick={() => setMenuOpen(false)}>Login</Link>
-              <Link href="/auth/signup" className="block" onClick={() => setMenuOpen(false)}>Sign Up</Link>
+              <Link
+                href="/"
+                className="block"
+                onClick={() => setMenuOpen(false)}
+              >
+                Home
+              </Link>
+              <Link
+                href="/about"
+                className="block"
+                onClick={() => setMenuOpen(false)}
+              >
+                About
+              </Link>
+              <Link
+                href="/contact"
+                className="block"
+                onClick={() => setMenuOpen(false)}
+              >
+                Contact
+              </Link>
+              <Link
+                href="/auth/login"
+                className="block"
+                onClick={() => setMenuOpen(false)}
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/auth/signup"
+                className="block"
+                onClick={() => setMenuOpen(false)}
+              >
+                Sign Up
+              </Link>
             </>
           )}
         </div>

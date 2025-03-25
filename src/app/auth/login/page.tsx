@@ -1,9 +1,8 @@
-"use client";
+"use client"; // for Next.js 13+ with app router
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "../../../../lib/supabase";
-import Header from "../../components/header"; // Use global Header
+import { supabase } from "../../../../lib/supabase"; // adjust path as needed
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -13,86 +12,58 @@ export default function Login() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(""); // Reset error before login attempt
+    setError("");
 
-    try {
-      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+    const { data, error: loginError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-      if (authError) {
-        setError("❌ Invalid email or password. Please try again.");
-        return;
-      }
-
-      // ✅ Fetch user profile from database
-      const { data: userProfile, error: profileError } = await supabase
-        .from("users")
-        .select("is_approved, registering_as")
-        .eq("id", authData.user?.id)
-        .single();
-
-      if (profileError || !userProfile) {
-        setError("⚠️ Unable to retrieve user profile. Please contact support.");
-        return;
-      }
-
-      if (!userProfile.is_approved) {
-        setError("⏳ Your account is pending approval. Please wait for admin approval.");
-        await supabase.auth.signOut();
-        return;
-      }
-
-      // ✅ Redirect to Dashboard after successful login
-      router.push("/dashboard");
-    } catch (error) {
-      console.error("Login Error:", error);
-      setError("⚠️ An unexpected error occurred. Please try again later.");
+    if (loginError || !data?.session) {
+      setError(loginError?.message || "Login failed. Please try again.");
+      return;
     }
+
+    // Redirect to products page
+    router.push("/products");
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* ✅ Use the global header */}
-      <Header />
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
+      <div className="bg-white shadow-md p-8 rounded-md max-w-md w-full">
+        <h1 className="text-2xl font-bold text-center mb-4">Login</h1>
 
-      {/* Login Form */}
-      <div className="max-w-md mx-auto p-6 border rounded shadow-lg mt-10 bg-white">
-        <h1 className="text-2xl font-bold mb-4">🔑 Login</h1>
         <form onSubmit={handleLogin} className="space-y-4">
           <label className="block">
-            Email <span className="text-red-500">*</span>
+            <span className="font-semibold text-gray-700">Email</span>
             <input
               type="email"
-              placeholder="Email"
+              className="w-full mt-1 p-2 border rounded"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-2 border rounded"
               required
             />
           </label>
           <label className="block">
-            Password <span className="text-red-500">*</span>
+            <span className="font-semibold text-gray-700">Password</span>
             <input
               type="password"
-              placeholder="Password"
+              className="w-full mt-1 p-2 border rounded"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-2 border rounded"
               required
             />
           </label>
+
           <button
             type="submit"
-            className="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+            className="w-full py-2 bg-orange-500 text-white font-semibold rounded hover:bg-orange-600"
           >
-            Login
+            Sign In
           </button>
         </form>
 
-        {/* ✅ Display errors dynamically */}
-        {error && <p className="text-red-500 mt-4">{error}</p>}
+        {error && <p className="text-red-500 text-center mt-4">{error}</p>}
       </div>
     </div>
   );

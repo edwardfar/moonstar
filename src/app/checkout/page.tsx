@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../../lib/supabase";
 import { useAuth } from "../auth/AuthContext";
@@ -10,48 +10,23 @@ export default function CheckoutPage() {
   const router = useRouter();
   const { user } = useAuth();
   const { cart, clearCart } = useCart();
-  const [checkImage, setCheckImage] = useState<File | null>(null);
-  const [uploading, setUploading] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      console.log("User object:", user); // Debugging log
+      if (user.email) {
+        setUserEmail(user.email);
+        console.log("Captured User Email:", user.email);
+      } else {
+        console.error("User email is not available.");
+      }
+    }
+  }, [user]);
 
   const getTotalPrice = () => {
     return cart.reduce((total, item) => total + item.price * item.quantity, 0).toFixed(2);
-  };
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files.length > 0) {
-      setCheckImage(event.target.files[0]);
-    }
-  };
-
-  const uploadCheckImage = async (file: File) => {
-    if (!file) return null;
-    if (!user || !user.id) {
-      alert("You must be logged in to upload a check image.");
-      return null;
-    }
-
-    setUploading(true);
-
-    try {
-      const filePath = `checks/${user.id}-${Date.now()}.${file.name.split(".").pop()}`;
-
-      const { error } = await supabase.storage.from("check_images").upload(filePath, file);
-      if (error) {
-        console.error("❌ Error uploading check image:", error);
-        alert("Failed to upload check image. Please try again.");
-        setUploading(false);
-        return null;
-      }
-
-      const { data: publicUrlData } = supabase.storage.from("check_images").getPublicUrl(filePath);
-      setUploading(false);
-      return publicUrlData.publicUrl || null;
-    } catch (error) {
-      console.error("❌ Unexpected error:", error);
-      alert("An error occurred while uploading the check image.");
-      setUploading(false);
-      return null;
-    }
   };
 
   const handleCheckout = async () => {
@@ -61,37 +36,43 @@ export default function CheckoutPage() {
       return;
     }
 
+    if (!userEmail) {
+      alert("Unable to retrieve your email. Please log in again.");
+      console.error("Email is null or undefined.");
+      return;
+    }
+
+    setLoading(true);
+
     try {
-      if (!checkImage) {
-        alert("Please upload a check image.");
-        return;
-      }
+      const orderData = {
+        user_id: user.id,
+        user_email: userEmail || "no-email@unknown.com", // Prevent null email
+        total: parseFloat(getTotalPrice()),
+        status: "pending",
+        items: JSON.stringify(cart), // Ensure cart is stored correctly as JSON
+        payment_type: "check",
+      };
 
-      const checkImageUrl = await uploadCheckImage(checkImage);
+      console.log("Order Data to Insert:", orderData);
 
-      const { error } = await supabase.from("orders").insert([
-        {
-          user_id: user.id,
-          total: parseFloat(getTotalPrice()),
-          status: "pending",
-          items: cart,
-          payment_type: "check",
-          check_image_url: checkImageUrl || null,
-        },
-      ]);
+      const { error } = await supabase.from("orders").insert([orderData]);
 
       if (error) {
-        console.error("❌ Supabase Error:", error);
+        console.error("❌ Supabase Insert Error:", error.message);
         alert("Error creating order in the database.");
+        setLoading(false);
         return;
       }
 
-      alert("✅ Order placed successfully! Your check will be reviewed.");
+      alert("✅ Order placed successfully! Your order is being reviewed.");
       clearCart();
       router.push("/success");
     } catch (error) {
       console.error("❌ Error during checkout:", error);
       alert("An error occurred during checkout. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -100,17 +81,14 @@ export default function CheckoutPage() {
       <h1 className="text-3xl font-bold mb-6">Checkout</h1>
       <h2 className="text-xl font-bold mb-4">Total: ${getTotalPrice()}</h2>
 
-      <label className="block mb-4">
-        <span className="text-gray-700">Upload Check/Wire Transfer Screenshot</span>
-        <input type="file" accept="image/*" onChange={handleFileChange} className="mt-2 p-2 border rounded" />
-      </label>
-
       <button
-        className={`bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 ${uploading ? "opacity-50 cursor-not-allowed" : ""}`}
+        className={`bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 ${
+          loading ? "opacity-50 cursor-not-allowed" : ""
+        }`}
         onClick={handleCheckout}
-        disabled={uploading}
+        disabled={loading}
       >
-        {uploading ? "Uploading..." : "Submit Order"}
+        {loading ? "Processing..." : "Submit Order"}
       </button>
     </div>
   );
