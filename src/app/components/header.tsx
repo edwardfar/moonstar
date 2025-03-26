@@ -6,7 +6,12 @@ import { useAuth } from "../auth/AuthContext";
 import { useCart } from "../CartContext";
 import { FaBars, FaTimes, FaTruck } from "react-icons/fa";
 
-export default function Header() {
+// Define header props (optional icon if needed)
+type HeaderProps = {
+  icon?: string;
+};
+
+export default function Header({ icon }: HeaderProps) {
   const { user, logout } = useAuth();
   const { cart } = useCart();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -18,21 +23,20 @@ export default function Header() {
     setCartCount(totalItems);
   }, [cart]);
 
-  // Optional: If you store a full name in user metadata, you could do:
-  // const [username, setUsername] = useState<string>("");
-  // useEffect(() => {
-  //   if (user) {
-  //     setUsername(user.email); // or user.user_metadata.name
-  //   }
-  // }, [user]);
+  // Determine the display name for the logged-in user:
+  // Use the business name if available, otherwise use email.
+  const displayName = user && (user.businessName || user.email);
 
   return (
     <header className="bg-gray-800 text-white p-4 shadow-md fixed w-full top-0 z-50">
       <div className="container mx-auto flex justify-between items-center">
+        {/* Optional icon next to logo if passed */}
+        {icon === "truck" && <FaTruck className="text-white mr-2" />}
+        
         {/* Logo */}
         <div className="flex items-center space-x-2">
           <img
-            src="products\moonstar-logo.jpg"
+            src="/products/moonstar-logo.jpg"
             alt="MoonStar Logo"
             className="h-8"
           />
@@ -44,18 +48,23 @@ export default function Header() {
         {/* Desktop Navigation */}
         <nav className="hidden lg:flex space-x-6 items-center">
           {user ? (
-            /* ---------- PRIVATE NAV (Logged-In) ---------- */
+            // PRIVATE NAV (Logged-In)
             <>
-              {/* Display a small greeting */}
+              {/* Greeting with account name */}
               <span className="text-sm text-gray-200">
-                Welcome, {user.email}
+                {displayName ? `Welcome, ${displayName}` : "Welcome"}
               </span>
-
+              <Link href="/" className="hover:underline">
+                Home
+              </Link>
+              <Link href="/about" className="hover:underline">
+                About
+              </Link>
+              <Link href="/contact" className="hover:underline">
+                Contact Us
+              </Link>
               <Link href="/dashboard" className="hover:underline">
                 Dashboard
-              </Link>
-              <Link href="/products" className="hover:underline">
-                Products
               </Link>
               <Link href="/cart" className="relative hover:underline">
                 <FaTruck size={20} />
@@ -65,12 +74,6 @@ export default function Header() {
                   </span>
                 )}
               </Link>
-              <Link href="/about" className="hover:underline">
-                About
-              </Link>
-              <Link href="/contact" className="hover:underline">
-                Contact
-              </Link>
               <button
                 onClick={logout}
                 className="hover:underline text-red-400 ml-2"
@@ -79,7 +82,7 @@ export default function Header() {
               </button>
             </>
           ) : (
-            /* ---------- PUBLIC NAV (Not Logged-In) ---------- */
+            // PUBLIC NAV (Not Logged-In)
             <>
               <Link href="/" className="hover:underline">
                 Home
@@ -88,7 +91,7 @@ export default function Header() {
                 About
               </Link>
               <Link href="/contact" className="hover:underline">
-                Contact
+                Contact Us
               </Link>
               <Link href="/auth/login" className="hover:underline">
                 Sign In
@@ -100,42 +103,27 @@ export default function Header() {
           )}
         </nav>
 
-        {/* Mobile Menu Button (Hamburger) */}
+        {/* Mobile Menu Button */}
         <button className="lg:hidden" onClick={() => setMenuOpen(!menuOpen)}>
           {menuOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
         </button>
       </div>
 
-      {/* Mobile Menu (visible if menuOpen = true) */}
+      {/* Mobile Menu */}
       {menuOpen && (
         <div className="lg:hidden bg-gray-900 text-white absolute w-full top-14 left-0 py-4 px-6 space-y-4 shadow-lg">
           {user ? (
-            /* ---------- PRIVATE NAV (Mobile) ---------- */
+            // PRIVATE NAV (Mobile)
             <>
               <span className="block text-sm text-gray-200">
-                Welcome, {user.email}
+                {displayName ? `Welcome, ${displayName}` : "Welcome"}
               </span>
               <Link
-                href="/dashboard"
+                href="/"
                 className="block"
                 onClick={() => setMenuOpen(false)}
               >
-                Dashboard
-              </Link>
-              <Link
-                href="/products"
-                className="block"
-                onClick={() => setMenuOpen(false)}
-              >
-                Products
-              </Link>
-              <Link
-                href="/cart"
-                className="block relative"
-                onClick={() => setMenuOpen(false)}
-              >
-                <FaTruck size={20} className="inline-block mr-2" />
-                Cart ({cartCount})
+                Home
               </Link>
               <Link
                 href="/about"
@@ -149,7 +137,22 @@ export default function Header() {
                 className="block"
                 onClick={() => setMenuOpen(false)}
               >
-                Contact
+                Contact Us
+              </Link>
+              <Link
+                href="/dashboard"
+                className="block"
+                onClick={() => setMenuOpen(false)}
+              >
+                Dashboard
+              </Link>
+              <Link
+                href="/cart"
+                className="block relative"
+                onClick={() => setMenuOpen(false)}
+              >
+                <FaTruck size={20} className="inline-block mr-2" />
+                Cart ({cartCount})
               </Link>
               <button
                 onClick={() => {
@@ -162,7 +165,7 @@ export default function Header() {
               </button>
             </>
           ) : (
-            /* ---------- PUBLIC NAV (Mobile) ---------- */
+            // PUBLIC NAV (Mobile)
             <>
               <Link
                 href="/"
@@ -183,7 +186,7 @@ export default function Header() {
                 className="block"
                 onClick={() => setMenuOpen(false)}
               >
-                Contact
+                Contact Us
               </Link>
               <Link
                 href="/auth/login"
