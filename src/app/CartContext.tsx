@@ -8,7 +8,7 @@ type CartItem = {
   price: number;
   quantity: number;
   image: string;
-  stripe_price_id: string; // ✅ Added Stripe price ID for checkout
+  
 };
 
 type CartContextType = {

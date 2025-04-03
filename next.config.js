@@ -1,9 +1,12 @@
-// next.config.js
+/** @type {import('next').NextConfig} */
 const nextConfig = {
-    eslint: {
-      ignoreDuringBuilds: true, // This will ignore ESLint errors during builds
-    },
-  };
-  
-  module.exports = nextConfig;
-  
+  images: {
+    domains: [
+      "via.placeholder.com", // for the placeholder fallback
+      "mycms.local",         // if you load images from your local WP
+      // add other domains as needed
+    ],
+  },
+};
+
+module.exports = nextConfig;

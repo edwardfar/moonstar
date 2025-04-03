@@ -14,6 +14,7 @@ type User = {
   id: string;
   email: string | null;
   role?: string;
+  businessName?: string; //
 };
 
 type AuthContextType = {
@@ -38,15 +39,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (data.session?.user) {
         const { data: userData, error } = await supabase
           .from("users")
-          .select("email, registering_as")
+          .select("email, business_name")
           .eq("id", data.session.user.id)
           .single();
+          console.log("🔍 Supabase session:", data.session);
+          console.log("🔍 Supabase userData:", userData);
+
 
         if (!error && userData) {
           setUser({
             id: data.session.user.id,
             email: userData.email || null,
-            role: userData.registering_as,
+            businessName: userData.business_name || null,
           });
         } else {
           setUser(null);

@@ -1,8 +1,8 @@
-"use client"; // for Next.js 13+ with app router
+"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "../../../../lib/supabase"; // adjust path as needed
+import { useAuth } from "../../auth/AuthContext"; // Adjust the path as needed
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -10,22 +10,18 @@ export default function Login() {
   const [error, setError] = useState("");
   const router = useRouter();
 
+  const { login } = useAuth(); // ✅ Use AuthContext
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
-    const { data, error: loginError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (loginError || !data?.session) {
-      setError(loginError?.message || "Login failed. Please try again.");
-      return;
+    try {
+      await login(email, password); // ✅ Let AuthContext handle login + user refresh
+      router.push("/products");     // ✅ Redirect after login
+    } catch (err: any) {
+      setError(err.message || "Login failed. Please try again.");
     }
-
-    // Redirect to products page
-    router.push("/products");
   };
 
   return (

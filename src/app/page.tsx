@@ -1,31 +1,52 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Header from "./components/header";
-import HeroCarousel from "./components/HeroCarousel";
-import ResponsiveImageGrid from "./components/ResponsiveImageGrid";
+import { fetchPage } from "../../lib/wordpress";
+
+interface PageData {
+  title: { rendered: string };
+  content: { rendered: string };
+  // Add additional fields if needed
+}
 
 export default function HomePage() {
-  // Example image data – update paths and alt texts as needed.
-  const galleryImages = [
-    { src: "/products/gallery1.jpg", alt: "Gallery Image 1" },
-    { src: "/products/gallery2.jpg", alt: "Gallery Image 2" },
-    { src: "/products/gallery3.jpg", alt: "Gallery Image 3" },
-    { src: "/products/gallery4.jpg", alt: "Gallery Image 4" },
-    { src: "/products/gallery5.jpg", alt: "Gallery Image 5" },
-    { src: "/products/gallery6.jpg", alt: "Gallery Image 6" },
-  ];
+  const [homeContent, setHomeContent] = useState<PageData | null>(null);
+
+  useEffect(() => {
+    const getData = async () => {
+      try {
+        const response = await fetchPage("home");
+        console.log("Home API response:", response);
+        // WordPress REST API returns an array; we take the first item.
+        const pageData: PageData = response[0];
+        console.log("Extracted pageData:", pageData);
+        setHomeContent(pageData);
+      } catch (error) {
+        console.error("Error fetching home page:", error);
+      }
+    };
+    getData();
+  }, []);
+
+  if (!homeContent) return <div>Loading...</div>;
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
-      {/* Header */}
+    <div className="min-h-screen bg-gray-50">
       <Header />
-
-      {/* Hero Carousel */}
-      <HeroCarousel />
-
-      {/* Responsive Image Gallery Section */}
-      <ResponsiveImageGrid images={galleryImages} />
+      
+      {/* Render Home page content from WordPress */}
+      <section className="py-16 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-6 text-orange-600">
+            {homeContent.title.rendered}
+          </h2>
+          <div
+            className="prose max-w-3xl mx-auto"
+            dangerouslySetInnerHTML={{ __html: homeContent.content.rendered }}
+          ></div>
+        </div>
+      </section>
 
       {/* Footer */}
       <footer className="bg-gray-800 text-white mt-auto">
