@@ -147,15 +147,19 @@ export default function CartPage() {
                       </tr>
                     );
                   }
-                  // Ensure item.image is a valid string; if missing, use a remote placeholder.
+                  // Updated image handling:
                   const fallbackUrl = "https://via.placeholder.com/50";
-                  const imgValue =
-                    typeof item.image === "string" && item.image.length > 0
-                      ? item.image
-                      : fallbackUrl;
-                  const imageSrc = imgValue.startsWith("http")
-                    ? imgValue
-                    : `/${imgValue}`;
+                  let imageSrc = "";
+                  if (typeof item.image === "string" && item.image.length > 0) {
+                    if (item.image.startsWith("http")) {
+                      imageSrc = item.image;
+                    } else {
+                      // Prepend the WordPress domain if image is a relative path
+                      imageSrc = `https://joyfullezzet.com/${item.image}`;
+                    }
+                  } else {
+                    imageSrc = fallbackUrl;
+                  }
 
                   // Safely convert price to a number
                   const numericPrice =
@@ -241,7 +245,7 @@ export default function CartPage() {
                     : fallbackSuggestion;
                 const suggestionImageSrc = suggestionImage.startsWith("http")
                   ? suggestionImage
-                  : `/${suggestionImage}`;
+                  : `https://joyfullezzet.com/${suggestionImage}`;
                 return (
                   <div
                     key={product.id}

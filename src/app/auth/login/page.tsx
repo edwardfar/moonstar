@@ -17,10 +17,14 @@ export default function Login() {
     setError("");
 
     try {
-      await login(email, password); // ✅ Let AuthContext handle login + user refresh
-      router.push("/products");     // ✅ Redirect after login
-    } catch (err: any) {
-      setError(err.message || "Login failed. Please try again.");
+      await login(email, password); // Let AuthContext handle login + user refresh
+      router.push("/products");     // Redirect after login
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message || "Login failed. Please try again.");
+      } else {
+        setError("Login failed. Please try again.");
+      }
     }
   };
 

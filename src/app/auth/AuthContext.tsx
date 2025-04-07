@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import {
@@ -10,7 +8,7 @@ import {
   ReactNode,
 } from "react";
 import { supabase } from "../../../lib/supabase";
-// Removed useRouter as it's not needed.
+// Removed: import { useRouter } from "next/navigation";
 
 type User = {
   id: string;
@@ -33,19 +31,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Check user session
   const checkUser = async () => {
     try {
-      const { data: sessionData } = await supabase.auth.getSession();
+      // Rename "data" to "sessionData" so it's clear and used below.
+      const { data: sessionData, error } = await supabase.auth.getSession();
       if (sessionData.session?.user) {
-        const { data: userData, error } = await supabase
+        const { data: userData, error: userError } = await supabase
           .from("users")
           .select("email, business_name")
           .eq("id", sessionData.session.user.id)
           .single();
-        console.log("Supabase session:", sessionData.session);
-        console.log("Supabase userData:", userData);
-
-        if (!error && userData) {
+        console.log("🔍 Supabase session:", sessionData.session);
+        console.log("🔍 Supabase userData:", userData);
+        if (!userError && userData) {
           setUser({
             id: sessionData.session.user.id,
             email: userData.email || null,
@@ -72,14 +71,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
     await checkUser();
-    // Removed navigation call.
+    // Removed: router.push("/") since we don't need navigation in this context.
   };
 
   const logout = async () => {
     await supabase.auth.signOut();
     setUser(null);
-    localStorage.removeItem("cart");
-    // Removed navigation call.
+    localStorage.removeItem("cart"); // Clear cart on logout
+    // Removed: router.push("/")
   };
 
   useEffect(() => {

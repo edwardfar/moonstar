@@ -4,8 +4,6 @@ import { useEffect, useState } from "react";
 import { supabase } from "../../../lib/supabase";
 import Header from "../components/header"; // Use unified Header
 import { useAuth } from "../auth/AuthContext";
-import { useCart } from "../CartContext";
-import { useRouter } from "next/navigation";
 
 type Order = {
   id: number;
@@ -13,15 +11,13 @@ type Order = {
   created_at: string;
   total: number;
   status: string;
-  items: any;
+  items: unknown; // Use 'unknown' instead of 'any'
 };
 
 export default function Dashboard() {
-  const { user, logout } = useAuth();
-  const { cart } = useCart();
+  const { user } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
 
   // Fetch user orders
   useEffect(() => {
@@ -33,8 +29,11 @@ export default function Dashboard() {
           .from("Orders")
           .select("*")
           .eq("user_id", user.id);
-        if (error) console.error("Error fetching orders:", error);
-        else setOrders(data || []);
+        if (error) {
+          console.error("Error fetching orders:", error);
+        } else {
+          setOrders(data || []);
+        }
       } catch (err) {
         console.error("Error fetching orders:", err);
       } finally {
@@ -67,7 +66,8 @@ export default function Dashboard() {
                 <li key={order.id} className="border-b py-2">
                   <strong>Order ID:</strong> {order.id}
                   <p>
-                    <strong>Date:</strong> {new Date(order.created_at).toLocaleDateString()}
+                    <strong>Date:</strong>{" "}
+                    {new Date(order.created_at).toLocaleDateString()}
                   </p>
                   <p>
                     <strong>Total:</strong> ${order.total}
@@ -76,7 +76,8 @@ export default function Dashboard() {
                     <strong>Status:</strong> {order.status}
                   </p>
                   <p>
-                    <strong>Items:</strong> {order.items ? JSON.stringify(order.items) : "No items in order."}
+                    <strong>Items:</strong>{" "}
+                    {order.items ? JSON.stringify(order.items) : "No items in order."}
                   </p>
                 </li>
               ))}

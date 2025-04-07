@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../auth/AuthContext";
 import { useCart } from "../CartContext";
 import { FaBars, FaTimes, FaTruck } from "react-icons/fa";
+import Image from "next/image";
 
 interface ExtendedUser {
   email?: string;
@@ -14,20 +15,20 @@ interface ExtendedUser {
 
 type HeaderProps = {
   icon?: string;
-  navigation?: any;
 };
 
-export default function Header({ icon, navigation }: HeaderProps) {
+export default function Header({ icon }: HeaderProps) {
   const { user: authUser, logout, loading } = useAuth();
-  useEffect(() => {
-    console.log("🔍 Auth user in header:", authUser);
-  }, [authUser]);
   const { cart } = useCart();
   const [menuOpen, setMenuOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
 
   const user = authUser as ExtendedUser | null;
   const isLoggedIn = !!user;
+
+  useEffect(() => {
+    console.log("🔍 Auth user in header:", authUser);
+  }, [authUser]);
 
   useEffect(() => {
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -44,12 +45,21 @@ export default function Header({ icon, navigation }: HeaderProps) {
         {!isMobile && displayName && (
           <span className="text-sm text-gray-200">Welcome, {displayName}</span>
         )}
-        <Link href="/" className="hover:underline">Home</Link>
-        <Link href="/about" className="hover:underline">About</Link>
-        <Link href="/contact" className="hover:underline">Contact Us</Link>
-        <Link href="/dashboard" className="hover:underline">Dashboard</Link>
-        <Link href="/products" className="hover:underline">Products</Link>
-
+        <Link href="/" className="hover:underline">
+          Home
+        </Link>
+        <Link href="/about" className="hover:underline">
+          About
+        </Link>
+        <Link href="/contact" className="hover:underline">
+          Contact Us
+        </Link>
+        <Link href="/dashboard" className="hover:underline">
+          Dashboard
+        </Link>
+        <Link href="/products" className="hover:underline">
+          Products
+        </Link>
         <Link href="/cart" className="relative hover:underline">
           <FaTruck size={20} />
           {cartCount > 0 && (
@@ -64,11 +74,21 @@ export default function Header({ icon, navigation }: HeaderProps) {
       </>
     ) : (
       <>
-        <Link href="/" className="hover:underline">Home</Link>
-        <Link href="/about" className="hover:underline">About</Link>
-        <Link href="/contact" className="hover:underline">Contact Us</Link>
-        <Link href="/auth/login" className="hover:underline">Sign In</Link>
-        <Link href="/auth/signup" className="hover:underline">Sign Up</Link>
+        <Link href="/" className="hover:underline">
+          Home
+        </Link>
+        <Link href="/about" className="hover:underline">
+          About
+        </Link>
+        <Link href="/contact" className="hover:underline">
+          Contact Us
+        </Link>
+        <Link href="/auth/login" className="hover:underline">
+          Sign In
+        </Link>
+        <Link href="/auth/signup" className="hover:underline">
+          Sign Up
+        </Link>
       </>
     );
   };
@@ -79,10 +99,12 @@ export default function Header({ icon, navigation }: HeaderProps) {
         {icon === "truck" && <FaTruck className="text-white mr-2" />}
 
         <div className="flex items-center space-x-2">
-          <img
+          <Image
             src="/products/moonstar-logo.jpg"
             alt="MoonStar Logo"
-            className="h-8"
+            width={120}
+            height={32}
+            className="object-contain"
           />
           <Link href="/" className="text-xl font-bold">
             MoonStar Food LLC
@@ -100,9 +122,7 @@ export default function Header({ icon, navigation }: HeaderProps) {
 
       {menuOpen && (
         <div className="lg:hidden bg-gray-900 text-white absolute w-full top-14 left-0 py-4 px-6 space-y-4 shadow-lg">
-         <div className="space-y-3 flex flex-col">
-  {renderLinks(true)}
-</div>
+          <div className="space-y-3 flex flex-col">{renderLinks(true)}</div>
           {isLoggedIn && (
             <button
               onClick={() => {
