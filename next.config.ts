@@ -1,9 +1,12 @@
-import type { NextConfig } from "next";
-
+import { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  images: {
+    domains: [
+      'via.placeholder.com', // for the placeholder fallback
+      'joyfullezzet.com',      // your live WP domain
+    ],
+  },
 };
 
 export default nextConfig;
-

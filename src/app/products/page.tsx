@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import Image from "next/image";
 import Header from "../components/header";
 import { useAuth } from "../auth/AuthContext";
@@ -8,7 +9,8 @@ import { useCart } from "../CartContext";
 import { supabase } from "../../../lib/supabase";
 import axios from "axios";
 
-const WP_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL;
+// Hardcoded WordPress URL for production
+const WP_URL = "https://joyfullezzet.com";
 
 // Helper: fetch products from WordPress
 async function fetchWpProducts(): Promise<any[]> {
@@ -48,7 +50,7 @@ export default function ProductPage() {
   useEffect(() => {
     async function getProducts() {
       try {
-        // 1) Fetch products from WordPress
+        // 1) Fetch from WordPress
         const wpProducts = await fetchWpProducts();
         console.log("Fetched WP products:", wpProducts);
 
@@ -58,7 +60,7 @@ export default function ProductPage() {
             // Get the barcode from WP ACF
             const barcode = prod.acf?.barcode;
             let customPrice: number | null = null;
-            // If user is logged in and barcode exists, try to fetch a custom price
+            // If user is logged in and barcode exists, try fetching custom price from Supabase
             if (user && barcode) {
               const { data, error } = await supabase
                 .from("user_product_prices")
@@ -68,30 +70,38 @@ export default function ProductPage() {
                 .single();
               if (!error && data) {
                 customPrice = data.custom_price;
-                console.log(
-                  `Custom price found for barcode ${barcode}:`,
-                  customPrice
-                );
+                console.log(`Custom price found for barcode ${barcode}:`, customPrice);
               } else {
-                console.log(
-                  `No custom price found for barcode ${barcode}. Using default WP price.`
-                );
+                console.log(`No custom price found for barcode ${barcode}. Using default WP price.`);
               }
             }
-            // Fallback price from WordPress ACF (ensure it's a valid number)
+            // Fallback price from WP ACF field
             const wpPrice = prod.acf?.price ? parseFloat(prod.acf.price) : 0;
-            // Final price: if custom price exists, use it; otherwise, use WP price
             const finalPrice = user && customPrice !== null ? customPrice : wpPrice;
 
-            // For image: if ACF returns a string, use it; if an object, use .url
+            // Handle the gallery field, which is set as a Gallery (returns an array of IDs)
             let imageUrl = "/placeholder.png";
-            if (prod.acf?.product_gallery) {
-              if (typeof prod.acf.product_gallery === "string") {
-                imageUrl = prod.acf.product_gallery;
-              } else if (typeof prod.acf.product_gallery === "object") {
-                imageUrl = prod.acf.product_gallery.url || "/placeholder.png";
-              }
-            }
+const gallery = prod.acf?.product_gallery;
+if (Array.isArray(gallery) && gallery.length > 0) {
+  const firstItem = gallery[0];
+  if (typeof firstItem === "number") {
+    // Look in the embedded attachments
+    const embeddedAttachments = prod._embedded?.["acf:attachment"];
+    if (Array.isArray(embeddedAttachments)) {
+      const foundAttachment = embeddedAttachments.find(
+        (att) => att.id === firstItem
+      );
+      if (foundAttachment && foundAttachment.source_url) {
+        imageUrl = foundAttachment.source_url;
+      }
+    }
+  } else if (typeof firstItem === "object" && firstItem.url) {
+    imageUrl = firstItem.url;
+  } else if (typeof firstItem === "string") {
+    imageUrl = firstItem;
+  }
+}
+
 
             return {
               id: prod.id,
@@ -112,12 +122,8 @@ export default function ProductPage() {
         setProducts(transformed);
 
         // Extract unique categories & tags
-        const uniqueCategories = Array.from(
-          new Set(transformed.map((p) => p.category))
-        );
-        const uniqueTags = Array.from(
-          new Set(transformed.flatMap((p) => p.tags))
-        );
+        const uniqueCategories = Array.from(new Set(transformed.map((p) => p.category)));
+        const uniqueTags = Array.from(new Set(transformed.flatMap((p) => p.tags)));
         setCategories(uniqueCategories);
         setTags(uniqueTags);
       } catch (error) {
@@ -152,7 +158,7 @@ export default function ProductPage() {
   };
 
   const getDisplayPrice = (p: Product) => {
-    return `$${p.price.toFixed(2)}`;
+    return p.price > 0 ? `$${p.price.toFixed(2)}` : "Not Available";
   };
 
   return (
@@ -220,13 +226,16 @@ export default function ProductPage() {
                 {/* Product Image & Title */}
                 <div className="mb-3">
                   <div className="relative w-full h-48 mb-2">
-                    <Image
-                      src={product.image}
-                      alt={product.name}
-                      fill
-                      sizes="(max-width: 768px) 100vw"
-                      className="object-cover rounded"
-                    />
+                    {/* Clicking the image takes you to a detail page */}
+                    <Link href={`/products/${product.id}`}>
+                      <Image
+                        src={product.image}
+                        alt={product.name}
+                        fill
+                        sizes="(max-width: 768px) 100vw"
+                        className="object-cover rounded cursor-pointer"
+                      />
+                    </Link>
                   </div>
                   <h2 className="text-lg font-bold text-gray-800 line-clamp-1">
                     {product.name}
@@ -249,9 +258,7 @@ export default function ProductPage() {
 
                 {/* Optional: Inventory */}
                 {product.inventory !== undefined && (
-                  <p className="text-sm text-gray-500">
-                    In Stock: {product.inventory}
-                  </p>
+                  <p className="text-sm text-gray-500">In Stock: {product.inventory}</p>
                 )}
 
                 {/* Quantity Selector */}

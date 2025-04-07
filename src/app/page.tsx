@@ -7,25 +7,27 @@ import { fetchPage } from "../../lib/wordpress";
 interface PageData {
   title: { rendered: string };
   content: { rendered: string };
-  // Add additional fields if needed
 }
 
 export default function HomePage() {
   const [homeContent, setHomeContent] = useState<PageData | null>(null);
 
   useEffect(() => {
-    const getData = async () => {
+    console.log("WP_URL:", process.env.NEXT_PUBLIC_WORDPRESS_URL);
+  }, []);
+
+  useEffect(() => {
+    async function getData() {
       try {
         const response = await fetchPage("home");
         console.log("Home API response:", response);
-        // WordPress REST API returns an array; we take the first item.
         const pageData: PageData = response[0];
         console.log("Extracted pageData:", pageData);
         setHomeContent(pageData);
       } catch (error) {
         console.error("Error fetching home page:", error);
       }
-    };
+    }
     getData();
   }, []);
 

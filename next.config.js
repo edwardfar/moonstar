@@ -3,7 +3,8 @@ const nextConfig = {
   images: {
     domains: [
       "via.placeholder.com", // for the placeholder fallback
-      "mycms.local",         // if you load images from your local WP
+      "joyfullezzet.com",         // if you load images from your local WP
+      "mycms.local"
       // add other domains as needed
     ],
   },
