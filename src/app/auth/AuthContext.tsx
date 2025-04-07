@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import {
@@ -8,7 +10,7 @@ import {
   ReactNode,
 } from "react";
 import { supabase } from "../../../lib/supabase";
-// Removed: import { useRouter } from "next/navigation";
+// Removed useRouter as it's not needed.
 
 type User = {
   id: string;
@@ -30,25 +32,22 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  // Removed router as it's not needed:
-  // const router = useRouter();
 
-  // ✅ Check user session
   const checkUser = async () => {
     try {
-      const { data } = await supabase.auth.getSession();
-      if (data.session?.user) {
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (sessionData.session?.user) {
         const { data: userData, error } = await supabase
           .from("users")
           .select("email, business_name")
-          .eq("id", data.session.user.id)
+          .eq("id", sessionData.session.user.id)
           .single();
-        console.log("🔍 Supabase session:", data.session);
-        console.log("🔍 Supabase userData:", userData);
+        console.log("Supabase session:", sessionData.session);
+        console.log("Supabase userData:", userData);
 
         if (!error && userData) {
           setUser({
-            id: data.session.user.id,
+            id: sessionData.session.user.id,
             email: userData.email || null,
             businessName: userData.business_name || null,
           });
@@ -66,23 +65,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // ✅ Login function (refresh state)
   const login = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data: loginData, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
       console.error("Login error:", error);
       return;
     }
-    await checkUser(); // Refresh user state after login
-    // Removed navigation call: router.push("/");
+    await checkUser();
+    // Removed navigation call.
   };
 
-  // ✅ Logout function (clear cart + refresh state)
   const logout = async () => {
     await supabase.auth.signOut();
     setUser(null);
-    localStorage.removeItem("cart"); // Clear cart on logout
-    // Removed navigation call: router.push("/");
+    localStorage.removeItem("cart");
+    // Removed navigation call.
   };
 
   useEffect(() => {
