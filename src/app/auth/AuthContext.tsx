@@ -8,13 +8,13 @@ import {
   ReactNode,
 } from "react";
 import { supabase } from "../../../lib/supabase";
-import { useRouter } from "next/navigation";
+// Removed: import { useRouter } from "next/navigation";
 
 type User = {
   id: string;
   email: string | null;
   role?: string;
-  businessName?: string; //
+  businessName?: string;
 };
 
 type AuthContextType = {
@@ -30,7 +30,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
+  // Removed router as it's not needed:
+  // const router = useRouter();
 
   // ✅ Check user session
   const checkUser = async () => {
@@ -42,9 +43,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           .select("email, business_name")
           .eq("id", data.session.user.id)
           .single();
-          console.log("🔍 Supabase session:", data.session);
-          console.log("🔍 Supabase userData:", userData);
-
+        console.log("🔍 Supabase session:", data.session);
+        console.log("🔍 Supabase userData:", userData);
 
         if (!error && userData) {
           setUser({
@@ -74,15 +74,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
     await checkUser(); // Refresh user state after login
-    router.push("/"); // Redirect to Home
+    // Removed navigation call: router.push("/");
   };
 
   // ✅ Logout function (clear cart + refresh state)
   const logout = async () => {
     await supabase.auth.signOut();
     setUser(null);
-    localStorage.removeItem("cart"); // ✅ Clear cart on logout
-    router.push("/"); // Redirect to home
+    localStorage.removeItem("cart"); // Clear cart on logout
+    // Removed navigation call: router.push("/");
   };
 
   useEffect(() => {
