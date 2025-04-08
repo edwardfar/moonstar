@@ -2,15 +2,22 @@
 const nextConfig = {
   images: {
     domains: [
-      "via.placeholder.com", // for the placeholder fallback
-      "joyfullezzet.com",      // images from your WordPress site
+      "via.placeholder.com",
+      "joyfullezzet.com",
       "mycms.local"
-      // add other domains as needed
     ],
   },
   eslint: {
-    // Warning: This allows production builds to complete even if there are lint errors.
     ignoreDuringBuilds: true,
+  },
+  // Add custom webpack configuration:
+  webpack: (config, { isServer }) => {
+    // Replace the problematic file with a stub
+    config.module.rules.push({
+      test: /my-cms\/src\/admin\/app\.example\.tsx$/,
+      use: 'null-loader'
+    });
+    return config;
   },
 };
 
