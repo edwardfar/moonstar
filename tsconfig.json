@@ -30,5 +30,5 @@
     "lib/**/*",
     "src/**/*"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["my-cms/src/admin/app.example.tsx"]
 }
