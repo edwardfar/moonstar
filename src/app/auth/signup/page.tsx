@@ -4,7 +4,8 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "../../../../lib/supabase";
-import Header from "../../components/header"; // ✅ Your unified header
+import Header from "../../components/header"; // Your unified header
+import Image from "next/image";
 
 export default function SignUp() {
   const [email, setEmail] = useState("");
@@ -80,6 +81,8 @@ export default function SignUp() {
             <span className="text-red-500 mx-1">*</span>
             are required.
           </p>
+
+          <Image src="/products/nutella.jpg" alt="Nutella" width={800} height={500} />
 
           <form onSubmit={handleSignUp} className="space-y-6">
             {/* Email and Password */}
@@ -260,9 +263,7 @@ export default function SignUp() {
 
       {/* Footer */}
       <footer className="bg-orange-600 text-white py-4">
-        <div className="text-center">
-          © 2025 MoonStar Food LLC. All rights reserved.
-        </div>
+        <div className="text-center">© 2025 MoonStar Food LLC. All rights reserved.</div>
       </footer>
     </div>
   );

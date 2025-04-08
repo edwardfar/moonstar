@@ -8,13 +8,13 @@ import {
   ReactNode,
 } from "react";
 import { supabase } from "../../../lib/supabase";
-// Removed: import { useRouter } from "next/navigation";
 
 type User = {
   id: string;
   email: string | null;
   role?: string;
   businessName?: string;
+  business_name?: string; // Added to match the property used in the code
 };
 
 type AuthContextType = {
@@ -34,30 +34,36 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // Check user session
   const checkUser = async () => {
     try {
-      // Rename "data" to "sessionData" so it's clear and used below.
-      const { data: sessionData, error } = await supabase.auth.getSession();
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+
+      if (sessionError) {
+        console.error("Error fetching session:", sessionError);
+        setUser(null);
+        return;
+      }
+
       if (sessionData.session?.user) {
         const { data: userData, error: userError } = await supabase
           .from("users")
-          .select("email, business_name")
+          .select("id, email, business_name")
           .eq("id", sessionData.session.user.id)
           .single();
-        console.log("🔍 Supabase session:", sessionData.session);
-        console.log("🔍 Supabase userData:", userData);
-        if (!userError && userData) {
-          setUser({
-            id: sessionData.session.user.id,
-            email: userData.email || null,
-            businessName: userData.business_name || null,
-          });
-        } else {
+
+        if (userError || !userData) {
+          console.error("Error fetching user data:", userError);
           setUser(null);
+        } else {
+          setUser({
+            id: userData.id,
+            email: userData.email,
+            businessName: userData.business_name || null, // Map business_name to businessName
+          });
         }
       } else {
         setUser(null);
       }
     } catch (error) {
-      console.error("Error checking user session:", error);
+      console.error("Unexpected error checking user session:", error);
       setUser(null);
     } finally {
       setLoading(false);
@@ -65,20 +71,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const login = async (email: string, password: string) => {
-    const { data: loginData, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      console.error("Login error:", error);
-      return;
+    try {
+      const { error: loginError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (loginError) {
+        console.error("Login error:", loginError);
+        throw new Error("Invalid email or password.");
+      }
+
+      await checkUser();
+    } catch (error) {
+      console.error("Unexpected error during login:", error);
+      throw error;
     }
-    await checkUser();
-    // Removed: router.push("/") since we don't need navigation in this context.
   };
 
   const logout = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    localStorage.removeItem("cart"); // Clear cart on logout
-    // Removed: router.push("/")
+    try {
+      await supabase.auth.signOut();
+      setUser(null);
+      localStorage.removeItem("cart"); // Clear cart on logout
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
   };
 
   useEffect(() => {

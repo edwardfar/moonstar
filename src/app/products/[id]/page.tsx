@@ -12,7 +12,7 @@ interface Product {
   title: { rendered: string };
   acf: {
     product_description: string;
-    product_gallery: any; // could be an array of numbers (IDs) or objects
+    product_gallery: number[] | { url: string }[];
     barcode: string;
     inventory?: number;
     price: number;
@@ -60,14 +60,14 @@ export default function ProductDetail() {
   // Extract the gallery images from the product.
   // We assume the ACF field returns an array of IDs; then we look in _embedded["acf:attachment"]
   let galleryImages: string[] = [];
-  const gallery = product.acf.product_gallery;
-  if (Array.isArray(gallery) && gallery.length > 0) {
-    if (typeof gallery[0] === "number") {
-      galleryImages = product._embedded?.["acf:attachment"]?.map((att) => att.source_url) || [];
-    } else if (typeof gallery[0] === "object" && gallery[0].url) {
-      galleryImages = gallery.map((img) => img.url);
-    }
+const gallery = product.acf.product_gallery;
+if (Array.isArray(gallery) && gallery.length > 0) {
+  if (typeof gallery[0] === "number") {
+    galleryImages = product._embedded?.["acf:attachment"]?.map((att) => att.source_url) || [];
+  } else if (isImageObject(gallery[0])) {
+    galleryImages = (gallery as { url: string }[]).map((img) => img.url);
   }
+}
 
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900 flex flex-col">
@@ -100,3 +100,7 @@ export default function ProductDetail() {
     </div>
   );
 }
+function isImageObject(obj: any): obj is { url: string } {
+  return obj && typeof obj.url === "string";
+}
+
