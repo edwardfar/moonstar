@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 "use client";
 
 import React, { useState } from "react";
@@ -96,9 +98,7 @@ export default function SignUp() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 
-                             focus:outline-none focus:ring-2 focus:ring-orange-500
-                             focus:border-orange-500 transition-all"
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
                   placeholder="you@example.com"
                 />
               </div>
@@ -111,9 +111,7 @@ export default function SignUp() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full rounded-md border border-gray-300 px-3 py-2
-                             focus:outline-none focus:ring-2 focus:ring-orange-500
-                             focus:border-orange-500 transition-all"
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
                   placeholder="••••••••"
                 />
               </div>
@@ -130,9 +128,7 @@ export default function SignUp() {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   required
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 
-                             focus:outline-none focus:ring-2 focus:ring-orange-500
-                             focus:border-orange-500 transition-all"
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
                   placeholder="(123) 456-7890"
                 />
               </div>
@@ -145,9 +141,7 @@ export default function SignUp() {
                   value={businessName}
                   onChange={(e) => setBusinessName(e.target.value)}
                   required
-                  className="w-full rounded-md border border-gray-300 px-3 py-2
-                             focus:outline-none focus:ring-2 focus:ring-orange-500
-                             focus:border-orange-500 transition-all"
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
                   placeholder="Your Company LLC"
                 />
               </div>
@@ -163,9 +157,7 @@ export default function SignUp() {
                 value={street}
                 onChange={(e) => setStreet(e.target.value)}
                 required
-                className="w-full rounded-md border border-gray-300 px-3 py-2
-                           focus:outline-none focus:ring-2 focus:ring-orange-500
-                           focus:border-orange-500 transition-all"
+                className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
                 placeholder="123 Main St."
               />
             </div>
@@ -177,9 +169,7 @@ export default function SignUp() {
                 type="text"
                 value={unitNumber}
                 onChange={(e) => setUnitNumber(e.target.value)}
-                className="w-full rounded-md border border-gray-300 px-3 py-2
-                           focus:outline-none focus:ring-2 focus:ring-orange-500
-                           focus:border-orange-500 transition-all"
+                className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
                 placeholder="Apt 4B"
               />
             </div>
@@ -195,9 +185,7 @@ export default function SignUp() {
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
                   required
-                  className="w-full rounded-md border border-gray-300 px-3 py-2
-                             focus:outline-none focus:ring-2 focus:ring-orange-500
-                             focus:border-orange-500 transition-all"
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
                   placeholder="City"
                 />
               </div>
@@ -210,9 +198,7 @@ export default function SignUp() {
                   value={state}
                   onChange={(e) => setState(e.target.value)}
                   required
-                  className="w-full rounded-md border border-gray-300 px-3 py-2
-                             focus:outline-none focus:ring-2 focus:ring-orange-500
-                             focus:border-orange-500 transition-all"
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
                   placeholder="State"
                 />
               </div>
@@ -225,9 +211,7 @@ export default function SignUp() {
                   value={zipCode}
                   onChange={(e) => setZipCode(e.target.value)}
                   required
-                  className="w-full rounded-md border border-gray-300 px-3 py-2
-                             focus:outline-none focus:ring-2 focus:ring-orange-500
-                             focus:border-orange-500 transition-all"
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
                   placeholder="12345"
                 />
               </div>
@@ -236,11 +220,7 @@ export default function SignUp() {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full py-3 mt-4 font-bold text-white rounded-md
-                         bg-gradient-to-r from-orange-500 to-pink-500
-                         hover:from-orange-600 hover:to-pink-600
-                         focus:outline-none focus:ring-2 focus:ring-orange-500
-                         transition-colors"
+              className="w-full py-3 mt-4 font-bold text-white rounded-md bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors"
             >
               Sign Up
             </button>

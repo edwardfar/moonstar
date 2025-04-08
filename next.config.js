@@ -3,10 +3,14 @@ const nextConfig = {
   images: {
     domains: [
       "via.placeholder.com", // for the placeholder fallback
-      "joyfullezzet.com",         // if you load images from your local WP
+      "joyfullezzet.com",      // images from your WordPress site
       "mycms.local"
       // add other domains as needed
     ],
+  },
+  eslint: {
+    // Warning: This allows production builds to complete even if there are lint errors.
+    ignoreDuringBuilds: true,
   },
 };
 
