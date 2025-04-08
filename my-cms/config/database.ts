@@ -1,7 +1,17 @@
 import path from 'path';
 
-export default ({ env }) => {
-  const client = env('DATABASE_CLIENT', 'sqlite');
+interface Env {
+  (key: string, defaultValue?: string): string;
+  int: (key: string, defaultValue?: number) => number;
+  bool: (key: string, defaultValue?: boolean) => boolean;
+}
+
+// Declare a type for the supported clients
+type ClientType = 'mysql' | 'postgres' | 'sqlite';
+
+export default ({ env }: { env: Env }) => {
+  // Assert that client is a valid ClientType
+  const client = env('DATABASE_CLIENT', 'sqlite') as ClientType;
 
   const connections = {
     mysql: {
