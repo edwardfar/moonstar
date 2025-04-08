@@ -8,20 +8,25 @@ import { useCart } from "../CartContext";
 import Header from "../components/header";
 import Image from "next/image";
 
+// Define a type for suggested products (update fields as needed)
+interface SuggestedProduct {
+  id: number | string;
+  name: string;
+  price: number;
+  image?: string;
+}
+
 export default function CartPage() {
   const router = useRouter();
   const { user } = useAuth();
   const { cart, updateQuantity, removeProduct, clearCart } = useCart();
 
-  const [suggestedProducts, setSuggestedProducts] = useState<any[]>([]);
+  const [suggestedProducts, setSuggestedProducts] = useState<SuggestedProduct[]>([]);
 
   // Fetch suggested products (optional)
   useEffect(() => {
     const fetchSuggestedProducts = async () => {
-      const { data, error } = await supabase
-        .from("Products")
-        .select("*")
-        .limit(5);
+      const { data, error } = await supabase.from("Products").select("*").limit(5);
       if (error) {
         console.error("Error fetching suggested products:", error);
       } else {
@@ -36,15 +41,13 @@ export default function CartPage() {
     let sum = 0;
     cart.forEach((item) => {
       const numericPrice =
-        typeof item.price === "number"
-          ? item.price
-          : parseFloat(item.price ?? "0");
+        typeof item.price === "number" ? item.price : parseFloat(item.price ?? "0");
       sum += numericPrice * (item.quantity || 0);
     });
     return sum.toFixed(2);
   };
 
-  // Submit order: Insert into orders then order_items
+  // Submit order: Insert order and then order items.
   const handleSubmitOrder = async () => {
     if (!user) {
       alert("You need to log in to place an order.");
@@ -54,7 +57,7 @@ export default function CartPage() {
 
     try {
       const totalPrice = parseFloat(getTotalPrice());
-      // Insert into orders and return the inserted row
+      // Insert order and return the inserted row
       const { data: insertedOrder, error: orderError } = await supabase
         .from("orders")
         .insert([
@@ -77,15 +80,12 @@ export default function CartPage() {
         return;
       }
 
-      console.log("Inserted order:", insertedOrder);
       const orderId = insertedOrder.id;
 
-      // Insert each cart item into order_items
+      // Prepare order items for insertion
       const itemsToInsert = cart.map((item) => {
         const numericPrice =
-          typeof item.price === "number"
-            ? item.price
-            : parseFloat(item.price ?? "0");
+          typeof item.price === "number" ? item.price : parseFloat(item.price ?? "0");
 
         return {
           order_id: orderId,
@@ -97,9 +97,7 @@ export default function CartPage() {
         };
       });
 
-      const { error: itemsError } = await supabase
-        .from("order_items")
-        .insert(itemsToInsert);
+      const { error: itemsError } = await supabase.from("order_items").insert(itemsToInsert);
 
       if (itemsError) {
         console.error("Error inserting order items:", itemsError);
@@ -129,15 +127,14 @@ export default function CartPage() {
               <thead>
                 <tr className="bg-gray-200 text-left">
                   <th className="p-4">Product</th>
-                  <th className="p-4">Quantity</th>
                   <th className="p-4">Price</th>
+                  <th className="p-4">Quantity</th>
                   <th className="p-4">Subtotal</th>
                   <th className="p-4">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {cart.map((item, index) => {
-                  console.log("Cart item at index:", index, item);
                   if (!item) {
                     return (
                       <tr key={index}>
@@ -147,25 +144,19 @@ export default function CartPage() {
                       </tr>
                     );
                   }
-                  // Updated image handling:
+                  // Determine the image source; prepend your WordPress domain if necessary.
                   const fallbackUrl = "https://via.placeholder.com/50";
                   let imageSrc = "";
                   if (typeof item.image === "string" && item.image.length > 0) {
-                    if (item.image.startsWith("http")) {
-                      imageSrc = item.image;
-                    } else {
-                      // Prepend the WordPress domain if image is a relative path
-                      imageSrc = `https://joyfullezzet.com/${item.image}`;
-                    }
+                    imageSrc = item.image.startsWith("http")
+                      ? item.image
+                      : `https://joyfullezzet.com/${item.image}`;
                   } else {
                     imageSrc = fallbackUrl;
                   }
 
-                  // Safely convert price to a number
                   const numericPrice =
-                    typeof item.price === "number"
-                      ? item.price
-                      : parseFloat(item.price ?? "0");
+                    typeof item.price === "number" ? item.price : parseFloat(item.price ?? "0");
 
                   return (
                     <tr key={item.id ?? index} className="border-b">
@@ -181,34 +172,27 @@ export default function CartPage() {
                           <p>{item.name || "Unnamed Product"}</p>
                         </div>
                       </td>
+                      <td className="p-4">${numericPrice.toFixed(2)}</td>
                       <td className="p-4 flex items-center">
                         <button
-                          onClick={() =>
-                            updateQuantity(item.id, item.quantity - 1)
-                          }
+                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
                           className="bg-gray-200 px-2 py-1 rounded"
                         >
                           -
                         </button>
                         <span className="px-4">{item.quantity}</span>
                         <button
-                          onClick={() =>
-                            updateQuantity(item.id, item.quantity + 1)
-                          }
+                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
                           className="bg-gray-200 px-2 py-1 rounded"
                         >
                           +
                         </button>
                       </td>
-                      <td className="p-4">${numericPrice.toFixed(2)}</td>
                       <td className="p-4">
                         {(numericPrice * (item.quantity || 0)).toFixed(2)}
                       </td>
                       <td className="p-4">
-                        <button
-                          onClick={() => removeProduct(item.id)}
-                          className="text-red-500"
-                        >
+                        <button onClick={() => removeProduct(item.id)} className="text-red-500">
                           Remove
                         </button>
                       </td>
@@ -232,7 +216,6 @@ export default function CartPage() {
           <p className="text-lg">Your cart is empty.</p>
         )}
 
-        {/* Optional: Suggested Products */}
         {suggestedProducts.length > 0 && (
           <div className="mt-10">
             <h2 className="text-2xl font-semibold mb-4">You May Also Like</h2>
@@ -247,10 +230,7 @@ export default function CartPage() {
                   ? suggestionImage
                   : `https://joyfullezzet.com/${suggestionImage}`;
                 return (
-                  <div
-                    key={product.id}
-                    className="bg-white p-4 rounded shadow text-center"
-                  >
+                  <div key={product.id} className="bg-white p-4 rounded shadow text-center">
                     <Image
                       src={suggestionImageSrc}
                       alt={product.name || "No Name"}
