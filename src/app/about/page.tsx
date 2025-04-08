@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { fetchPage } from "../../../lib/strapi";
+import axios from "axios";
+import Header from "../components/header";
 
 interface PageAttributes {
   title: string;
@@ -10,32 +11,48 @@ interface PageAttributes {
 
 export default function AboutPage() {
   const [aboutContent, setAboutContent] = useState<PageAttributes | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const getData = async () => {
+    const fetchAboutPage = async () => {
       try {
-        const aboutRes = await fetchPage("about");
-        console.log("aboutRes:", aboutRes);
-        // Try extracting using typical Strapi v4 structure
-        let pageData = aboutRes.data?.data?.[0]?.attributes;
-        if (!pageData) {
-          // If that fails, try a flat structure:
-          pageData = aboutRes.data?.[0];
+        // Replace NEXT_PUBLIC_WORDPRESS_URL with your WordPress URL (without a trailing slash)
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_WORDPRESS_URL}/wp-json/wp/v2/pages?slug=about`
+        );
+        const data = response.data;
+        if (Array.isArray(data) && data.length > 0) {
+          const page = data[0];
+          setAboutContent({
+            title: page.title.rendered,
+            content: page.content.rendered,
+          });
+        } else {
+          console.error(
+            "About page not found. Ensure it is published in WordPress with the slug 'about'."
+          );
         }
-        console.log("Extracted pageData:", pageData);
-        setAboutContent(pageData);
       } catch (error) {
         console.error("Error fetching About page:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
-    getData();
+    fetchAboutPage();
   }, []);
 
-  if (!aboutContent) return <div>Loading...</div>;
+  if (loading) return <div>Loading...</div>;
+  if (!aboutContent)
+    return (
+      <div>
+        About page not found. Please publish an About page in WordPress with the slug "about".
+      </div>
+    );
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Header />
       <div className="container mx-auto px-4 py-16">
         <h1 className="text-4xl font-bold text-center mb-8 text-orange-600">
           {aboutContent.title}

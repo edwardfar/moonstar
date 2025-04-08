@@ -11,7 +11,7 @@ type Order = {
   created_at: string;
   total: number;
   status: string;
-  items: unknown; // Use 'unknown' instead of 'any'
+  items: unknown; 
 };
 
 export default function Dashboard() {
